@@ -6,3 +6,4 @@
 /chat/.vscode
 /chat/android
 /chat/build
+/chat/*.lock
