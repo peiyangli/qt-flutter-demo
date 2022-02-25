@@ -7,54 +7,286 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
+
 import 'package:protobuf/protobuf.dart';
 import 'pb/sys_jh.pb.dart';
 import 'pb/ids_jh.pb.dart';
+import 'package:cryptography/cryptography.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
-typedef void NWCallback(Uint8List a);
-void name(void Function(Uint8List) a) {
-  a(Uint8List(1));
-}
+import 'package:path/path.dart';
+import 'package:flutter/widgets.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite/sqflite.dart';
+// import 'package:hive/hive.dart';
+// import 'package:hive_flutter/hive_flutter.dart';
 
 void main() {
 //test singleton and network
+  // SecurityContext.defaultContext.setTrustedCertificates("");
+  // ByteData data = await rootBundle.load('assets/certificate/[certificateName].crt');
+
+  // SecurityContext.defaultContext.setTrustedCertificatesBytes(cert1.codeUnits);
+
   Network.instance;
+  // TestSql();
+  callMe();
+  TestA();
+  Network().close();
+  print("clsoed");
   Network().connect(() {
-    Network().query(Header.build(Fids.Fids_SysTimeQuery),
-        q: SysTimeQuery(tt: SysTimeTypes.STT_Second));
-
-    Network().query(Header.build(Fids.Fids_SysTimeQuery),
-        q: SysTimeQuery(tt: SysTimeTypes.STT_Second), r: (header, body) {
-      if (header == null) {
-        //this is an error
-        return;
-      }
-      var r = SysTimeQueryResponse.fromBuffer(body);
-      print("$r");
-    });
-
-    Network().query(Header.build(Fids.Fids_SysTimeQuery), q: SysTimeQuery(),
-        r: (header, body) {
-      if (header == null) {
-        //this is an error
-        return;
-      }
-      var r = SysTimeQueryResponse.fromBuffer(body);
-      print("$r");
-    });
-
-    Network().query(Header.build(Fids.Fids_SysEchoQuery),
-        q: SysEchoQuery(word: "hello, this is a test"), r: (header, body) {
-      if (header == null) {
-        //this is an error
-        return;
-      }
-      var r = SysEchoQueryResponse.fromBuffer(body);
-      print("$r");
-    });
+    callMe();
   });
 
   runApp(const ChatApp());
+}
+
+class Dog {
+  final int id;
+  final String name;
+  final int age;
+
+  const Dog({
+    required this.id,
+    required this.name,
+    required this.age,
+  });
+
+  // Convert a Dog into a Map. The keys must correspond to the names of the
+  // columns in the database.
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'age': age,
+    };
+  }
+
+  // Implement toString to make it easier to see information about
+  // each dog when using the print statement.
+  @override
+  String toString() {
+    return 'Dog{id: $id, name: $name, age: $age}';
+  }
+}
+
+
+// void TestHive() async {
+//   await Hive.initFlutter();
+  
+//   var box = await Hive.openBox('testBox');
+
+
+//   Uint8List a = Uint8List.fromList([10,0,0,0,1,1,1,2]);
+
+//   await box.put(Uint8List.fromList([10,0,0,0,1,1,1,2]), "Im a");
+//   await box.put(Uint8List.fromList([10,0,0,0,1,1,1,4]), "Im b");
+//   await box.put(Uint8List.fromList([10,0,0,0,1,1,2,0]), "Im c");
+//   await box.put(Uint8List.fromList([10,0,0,0,1,1,2,1]), "Im d");
+
+//   box.put('name', 'David');
+
+//   // box.valuesBetween();
+  
+//   print('Name: ${box.get('name')}');
+// }
+
+void TestSql() async {
+  if (Platform.isWindows || Platform.isLinux) {
+    // Initialize FFI
+    sqfliteFfiInit();
+    // Change the default factory
+    databaseFactory = databaseFactoryFfi;
+  }
+  // Avoid errors caused by flutter upgrade.
+  // Importing 'package:flutter/widgets.dart' is required.
+  WidgetsFlutterBinding.ensureInitialized();
+
+  var dbpath = await getDatabasesPath();
+
+  // Open the database and store the reference.
+  final database = openDatabase(
+    // Set the path to the database. Note: Using the `join` function from the
+    // `path` package is best practice to ensure the path is correctly
+    // constructed for each platform.
+    join(dbpath, 'doggie_database.db'),
+    // When the database is first created, create a table to store dogs.
+    onCreate: (db, version) {
+      // Run the CREATE TABLE statement on the database.
+      return db.execute(
+        'CREATE TABLE dogs(id INTEGER PRIMARY KEY, name TEXT, age INTEGER)',
+      );
+    },
+    // Set the version. This executes the onCreate function and provides a
+    // path to perform database upgrades and downgrades.
+    version: 1,
+  );
+
+  // A method that retrieves all the dogs from the dogs table.
+  Future<List<Dog>> dogs() async {
+    // Get a reference to the database.
+    final db = await database;
+
+    // Query the table for all The Dogs.
+    final List<Map<String, dynamic>> maps = await db.query('dogs');
+
+    // Convert the List<Map<String, dynamic> into a List<Dog>.
+    return List.generate(maps.length, (i) {
+      return Dog(
+        id: maps[i]['id'],
+        name: maps[i]['name'],
+        age: maps[i]['age'],
+      );
+    });
+  }
+
+  // Define a function that inserts dogs into the database
+  Future<void> insertDog(Dog dog) async {
+    // Get a reference to the database.
+    final db = await database;
+
+    // Insert the Dog into the correct table. You might also specify the
+    // `conflictAlgorithm` to use in case the same dog is inserted twice.
+    //
+    // In this case, replace any previous data.
+    await db.insert(
+      'dogs',
+      dog.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  // Create a Dog and add it to the dogs table
+  var fido = const Dog(
+    id: 0,
+    name: 'Fido',
+    age: 35,
+  );
+
+  // await insertDog(fido);
+
+  // Now, use the method above to retrieve all the dogs.
+  print(await dogs()); // Prints a list that include Fido.
+}
+
+Future<void> TestA() async {
+  final algorithm = AesGcm.with256bits();
+
+  // Generate a random 256-bit secret key
+  final secretKey = await algorithm.newSecretKey();
+
+  // Generate a random 96-bit nonce.
+  final nonce = algorithm.newNonce();
+
+  // Encrypt
+  final clearText = [1, 2, 3];
+  final secretBox = await algorithm.encrypt(
+    clearText,
+    secretKey: secretKey,
+    nonce: nonce,
+  );
+  print('Ciphertext: ${secretBox.cipherText}');
+  print('MAC: ${secretBox.mac}');
+}
+
+String cert1 = '''-----BEGIN CERTIFICATE-----
+MIIEbjCCA1agAwIBAgIIazc8n0fyUCswDQYJKoZIhvcNAQELBQAwgY4xCzAJBgNV
+BAYTAkNOMRAwDgYDVQQIEwdTaUNodWFuMRAwDgYDVQQHEwdDaGVuZ0R1MRMwEQYD
+VQQKEwpndXpoaS5kYXRlMRMwEQYDVQQLEwpndXpoaS5kYXRlMRMwEQYDVQQDEwpn
+dXpoaS5kYXRlMRwwGgYJKoZIhvcNAQkBFg1jYUBndXpoaS5kYXRlMB4XDTE5MDgx
+MzA2NDUwMFoXDTI5MDgxMzA2NDUwMFowgY4xCzAJBgNVBAYTAkNOMRAwDgYDVQQI
+EwdTaUNodWFuMRAwDgYDVQQHEwdDaGVuZ0R1MRMwEQYDVQQKEwpndXpoaS5kYXRl
+MRMwEQYDVQQLEwpndXpoaS5kYXRlMRMwEQYDVQQDEwpndXpoaS5kYXRlMRwwGgYJ
+KoZIhvcNAQkBFg1jYUBndXpoaS5kYXRlMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A
+MIIBCgKCAQEApaamlbpurG2OqhrK1DTFPFgoCtbVj2/j0vAmJj45PBeI8LFku3Of
+Yzejwm/QFM/P+uVKRIW4V/G5EQjJMFUrlomO4mb1sC1OibxwmQgpq2rA18TG3/lN
+ObcKEYAhtiN4x7+klYWEzy+34YueoG+GrTD3uYnvaKqWUcoNuya1jlPClO8jdEgE
++NutgnqD5DvChzdE0QbLBsIfpfbw25zOzVUSb/N7Qr/C/YYKITrWMHceLWPt1cUc
+IMa2mqcEka0Tu5cBBo2AXLK9zy/InwYYFp7UydP6TjjLfj+39zalBYGvXWrm0lel
+Ap3h6txd5Zw5FCKd4VCY3YZbd8JtmFcrZQIDAQABo4HNMIHKMA8GA1UdEwEB/wQF
+MAMBAf8wHQYDVR0OBBYEFOlfvVsOBvJixDyzlHo4dIRkMZN0MAsGA1UdDwQEAwIB
+BjAVBgNVHRIEDjAMhgpndXpoaS5kYXRlMCYGCCsGAQUFBwEBBBowGDAWBggrBgEF
+BQcwAoYKZ3V6aGkuZGF0ZTARBglghkgBhvhCAQEEBAMCAAcwGQYJYIZIAYb4QgEM
+BAwWCmd1emhpLmRhdGUwHgYJYIZIAYb4QgENBBEWD3hjYSBjZXJ0aWZpY2F0ZTAN
+BgkqhkiG9w0BAQsFAAOCAQEAH7Any5ZAqS+3BhlTHVp1rrxnj2TonSafcoZpLqxA
+A4LR6pRWId78GGvZ53+N9gaRNF5yrktNfZ1elh4NLbp7C/736pRoL8eXfRr9qG+e
+BeUqLChoqN23svClXmsyn0CjqW1hXEpbRmQ8A6VY4JXhZ7XnzUyBltKF/XW5MOof
+yW0cE+O1PJAzYilD1uNh6EC9l/LBxK47nv2mY/3/toEtONXU/9yilkM+oSNOzmKX
+DcTfHxSgNKF9bMzFol7u4stg1YX+V3xOcZIm4xoWJKD4i8nRZexTCqvSWYcSsCt7
+Wa71OdqgOC8iBLAElzPNkYD6C3sRgPIcUwTZh6J5PPoC4g==
+-----END CERTIFICATE-----
+''';
+
+String cert2 = '''-----BEGIN CERTIFICATE-----
+MIIECjCCAvKgAwIBAgIIA5AB7/dwPgwwDQYJKoZIhvcNAQELBQAwgYoxCzAJBgNV
+BAYTAkNOMQswCQYDVQQIEwJTQzEWMBQGA1UEBxMNbG9jYWwgcm9vdCBjYTERMA8G
+A1UEChMIcWluZ3RlbmcxCzAJBgNVBAsTAlFUMRYwFAYDVQQDEw1sb2NhbCByb290
+IGNhMR4wHAYJKoZIhvcNAQkBFg9jYUBxaW5ndGVuZy5jb20wHhcNMjEwOTA5MDEy
+NjAwWhcNMzEwOTA5MDEyNjAwWjCBijELMAkGA1UEBhMCQ04xCzAJBgNVBAgTAlND
+MRYwFAYDVQQHEw1sb2NhbCByb290IGNhMREwDwYDVQQKEwhxaW5ndGVuZzELMAkG
+A1UECxMCUVQxFjAUBgNVBAMTDWxvY2FsIHJvb3QgY2ExHjAcBgkqhkiG9w0BCQEW
+D2NhQHFpbmd0ZW5nLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB
+AMVdWKHEovzzlty+llBJDb+oVcP8cBJ608atIsATf+SRktStUFZXyUuhx3M11EEt
+JiWgm+uvBG3Uw+6c9e/AJpDHC4Skz1OGt3zfyxQjkVDOQhPiRm7o2v/4iWkgDlur
+qQk+A+1sIKDE7LFMVrcAXsPsdxMhdLyWeTkvKOx6uxf0iLZJoNxzyGCZ7EIINUeM
+fy+pvwms51QeVwnXxqCshlKYyepq2UyPh/jTb28s8CcfQ3OYBg3KXdMWYrKlwnUk
+jgJD1WBLguRLDxdyYU8+jPpt/Oag5jqv/qvvg+zwTuJ5EE7zQNv8O98ZpiPKZlO3
+SypoqKP0zi4zqL+aPm+1F8UCAwEAAaNyMHAwDwYDVR0TAQH/BAUwAwEB/zAdBgNV
+HQ4EFgQUWp/tDQgW+mbWAKOsO16C61eUrlQwCwYDVR0PBAQDAgEGMBEGCWCGSAGG
++EIBAQQEAwIABzAeBglghkgBhvhCAQ0EERYPeGNhIGNlcnRpZmljYXRlMA0GCSqG
+SIb3DQEBCwUAA4IBAQCnRLljZQ/nLHMeynQk3bk1yZ7DvulqkxdspmYxxQg0qQZm
+yEO2PUJBfHuiZ6ESyE97KcfVqomjq516WhheDmSv1GQJW4gN1dEHFlmQJCxQ0hCr
+IENjCZlnuwVikYQrIdZpMP6sZDI3JfAK72VGPbZlmtBLHZSUPTv66oNF3mNc0Gog
+/BAHAOJ1+owqsuihtsA9xL2EOPxWPyfRYtTwIo210pUSsqPteMvQgjgG4rxcWM2/
+UsBln0HFu3IuDrpOHi6JHXEfvr4lEI8QW6nCb7Rj2VYIwEivR87uYacvxv14QPaf
+LI9I2vePnl8pRfRM+WPa4xUww1gmoqUJQILaafdd
+-----END CERTIFICATE-----
+''';
+
+void callMe() async {
+  try {
+    var pkg = await Network().query(Fids.Fids_SysTimeQuery,
+        q: SysTimeQuery(tt: SysTimeTypes.STT_MilliSecond));
+    var msg = SysTimeQueryResponse.fromBuffer(pkg.body);
+    print('$msg');
+  } catch (e) {
+    print(e);
+  } finally {}
+
+  Network().query(Fids.Fids_SysTimeQuery, q: SysTimeQuery()).then((pkg) {
+    var msg = SysTimeQueryResponse.fromBuffer(pkg.body);
+    print('$msg');
+  }).onError((error, stackTrace) {
+    print('$error, $stackTrace');
+  });
+
+  try {
+    var pkg = await Network().query(Fids.Fids_SysEchoQuery,
+        q: SysEchoQuery(word: "hello, this is a test"));
+    var msg = SysEchoQueryResponse.fromBuffer(pkg.body);
+    print('$msg');
+    // Network().close();
+  } catch (e) {
+    print(e);
+  } finally {}
+
+  Network()
+      .query(Fids.Fids_SysHeartBeatQuery, q: SysHeartBeatQuery())
+      .then((pkg) {
+    var msg = SysHeartBeatQueryResponse.fromBuffer(pkg.body);
+    print('$msg');
+  }).onError((error, stackTrace) {
+    print('$error, $stackTrace');
+  });
+
+  try {
+    var pkg = await Network()
+        .query(Fids.Fids_SysHeartBeatQuery, q: SysHeartBeatQuery());
+    var msg = SysHeartBeatQueryResponse.fromBuffer(pkg.body);
+    print('$msg');
+  } catch (e) {
+    print(e);
+  } finally {}
 }
 
 class ChatApp extends StatelessWidget {
@@ -85,7 +317,7 @@ class Header {
   Header.fromList(Uint8List a) : header = Uint8List(headerLength) {
     header.setRange(0, headerLength, a);
   }
-  Header.build(dynamic fid,
+  Header.build(ProtobufEnum fid,
       {int qid = 0,
       int tag = 0x1615,
       int ver = 1,
@@ -100,7 +332,7 @@ class Header {
     hd.setUint8(4, tp);
     hd.setUint8(5, res);
     hd.setUint32(6, qid);
-    hd.setUint32(10, fid as int);
+    hd.setUint32(10, fid.value);
     hd.setUint16(14, code);
     // return Header(h);
   }
@@ -162,61 +394,90 @@ class HeaderView {
   }
 }
 
-typedef void NWQueryCallback(HeaderView? header, Uint8List body);
+class Package {
+  HeaderView header;
+  Uint8List body;
+  Package(this.header, this.body);
+}
+
+// typedef void NWQueryCallback(Package? pkg);
+typedef void NWEvent(Package pkg);
+
+enum NWStatus {
+  unknown,
+  package, //package parse
+  unconnected, //not ready
+  connecting, //not ready
+  connectError, //when connect
+  done, //done, socket closed
+  close, //ok close
+}
+
+class NWError {
+  Object? err;
+  StackTrace? stack;
+  NWStatus status;
+  NWError(this.status, {Object? e, StackTrace? s})
+      : err = e,
+        stack = s;
+}
 
 class Conn {
   int id;
   Conn(this.id, this.onEvent);
   Socket? _conn;
-  bool _isConnected = false;
-
+  NWError _err = NWError(NWStatus.unconnected);
 
   //write package
-  bool write(Uint8List header, {Uint8List? body}) {
-    if (!_isConnected) {
-      return false;
-    }
-    _write(header, body: body);
-    return true;
-  }
-
   void _write(Uint8List header, {Uint8List? body}) {
+    _tick = 0;
     var tagLen = Uint8List(4);
     var bytedata = ByteData.view(tagLen.buffer);
     if (body == null) {
       bytedata.setUint32(0, header.length);
-      _conn?.add(tagLen);
-      _conn?.add(header);
+      _conn!.add(tagLen);
+      _conn!.add(header);
     } else {
       bytedata.setUint32(0, header.length + body.length);
-      _conn?.add(tagLen);
-      _conn?.add(header);
-      _conn?.add(body);
+      _conn!.add(tagLen);
+      _conn!.add(header);
+      _conn!.add(body);
     }
   }
 
   //make a query
   int _qid = 1;
-  Map<int, NWQueryCallback> queryCallbacks = {};
-  bool query(Header header, {Uint8List? body, NWQueryCallback? callback}) {
-    if (!_isConnected) {
-      return false;
+  Map<int, Completer<Package>> queryCallbacks = {};
+  Future<Package> query(Header header, {Uint8List? body}) async {
+    var c = Completer<Package>();
+    if (_conn == null) {
+      c.completeError(_err);
+      return c.future;
     }
-    if (callback != null) {
-      var qid = _qid++;
-      header.qid = qid;
-      queryCallbacks[qid] = callback;
+    var qid = _qid++;
+    header.qid = qid;
+    queryCallbacks[qid] = c;
+    try {
+      _write(header.header, body: body);
+    } catch (e, s) {
+      c.completeError(NWError(NWStatus.unknown, e: e, s: s), s);
     }
-    _write(header.header, body: body);
-    return true;
-  }
-
-  Future q()async{
-    var c = Completer();
     return c.future;
   }
 
-  NWQueryCallback onEvent;
+  bool send(Header header, {Uint8List? body}) {
+    if (_conn == null) {
+      return false;
+    }
+    try {
+      _write(header.header, body: body);
+      return true;
+    } catch (e, s) {
+      return false;
+    }
+  }
+
+  NWEvent onEvent;
   void onData(Uint8List data) {
     var hdv = HeaderView.fromUint8List(data.sublist(0, Header.headerLength));
     if (hdv.isRes) {
@@ -228,37 +489,117 @@ class Conn {
       if (handler == null) {
         return;
       }
-      handler(hdv, data.sublist(Header.headerLength));
+      handler.complete(Package(hdv, data.sublist(Header.headerLength)));
       return;
     } else {
-      onEvent(hdv, data.sublist(Header.headerLength));
+      onEvent(Package(hdv, data.sublist(Header.headerLength)));
     }
   }
 
   static const bufferLength = 512;
   Uint8List buffer0 = Uint8List(0);
-  void _disconnected() {
-    _isConnected = false;
+  void _disconnected(NWError e, {bool n = false}) {
+    if (_conn == null && !n) {
+      return;
+    }
+    //call once
+    _err = e;
     _conn == null;
+    _onError?.call(e);
     queryCallbacks.forEach((key, value) {
-      value(null, buffer0);
+      value.completeError(e, e.stack);
     });
     queryCallbacks.clear();
+    _ticker?.cancel();
   }
 
+  void close() {
+    if (_err.status == NWStatus.unconnected ||
+        _err.status == NWStatus.connecting) {
+      _err.status = NWStatus.close;
+    }
+    var conn = _conn;
+    _disconnected(_err);
+    if (conn != null) {
+      conn.close();
+    }
+  }
+
+  static SecurityContext get securityContext {
+    SecurityContext s = SecurityContext();
+    s.setTrustedCertificatesBytes(cert1.codeUnits);
+    return s;
+  }
+
+//import 'package:x509b/x509.dart' as x509;
+//   bool verifyCertificate() {
+//     var strX1PublicKeyInfo = "-----BEGIN PUBLIC KEY-----\nSOME PUBLIC KEY\n-----END PUBLIC KEY-----";
+//     var strX2Certificate = "-----BEGIN CERTIFICATE-----\nSOME CERTIFICATE\n-----END CERTIFICATE-----";
+//     var x1PublicKey = (x509.parsePem(strX1PublicKeyInfo).single as x509.SubjectPublicKeyInfo).subjectPublicKey as x509.RsaPublicKey;
+//     var x2Certificate = x509.parsePem(strX2Certificate).single as x509.X509Certificate;
+//     var x2CertificateDER = decodePEM(strX2Certificate);
+//     var asn1Parser = ASN1Parser(x2CertificateDER);
+//     var seq = asn1Parser.nextObject() as ASN1Sequence;
+//     var tbsSequence = seq.elements[0] as ASN1Sequence;
+//     var signature = x509.Signature(Uint8List.fromList(x2Certificate.signatureValue!));
+//     var verifier = x1PublicKey.createVerifier(x509.algorithms.signing.rsa.sha256);
+//     return verifier.verify(tbsSequence.encodedBytes, signature)
+// }
+
+  Timer? _ticker; //
+  int _tick = 0;
+  Function? _onError;
   void connect(host, int port,
       {Duration? timeout,
       Function? onConnected,
+      Function? onHeartBeat,
+      int heartBeat = 172,
       Function? onError,
-      Function? onDone,
-      bool? cancelOnError}) {
-    Socket.connect(host, port, timeout: timeout).then((value) {
+      bool? cancelOnError}) async {
+    //only connect once
+    if (_err.status != NWStatus.unconnected) {
+      return;
+    }
+    if (onHeartBeat != null && heartBeat > 0) {
+      _ticker = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (_tick++ > heartBeat) {
+          _tick = 0;
+          onHeartBeat();
+        }
+        // DateTime.now().difference(other)
+      });
+    }
+
+    _onError = onError;
+    _err.status = NWStatus.connecting;
+
+    SecurityContext securityContext = SecurityContext();
+    securityContext.setTrustedCertificatesBytes(cert1.codeUnits);
+    // securityContext.useCertificateChainBytes(cert1.codeUnits);
+    // securityContext.setAlpnProtocols([], true);
+
+    SecureSocket.connect(
+      host,
+      port,
+      context: securityContext,
+      onBadCertificate: (cert) {
+        var pem = cert.pem;
+        var issuer = cert.issuer;
+        print("$cert");
+        return false;
+      },
+      timeout: timeout,
+    ).then((value) {
+      if (_err.status != NWStatus.connecting) {
+        //maybe closed
+        _disconnected(NWError(NWStatus.close));
+        value.close(); //why?
+        return;
+      }
       _conn = value;
-      _isConnected = true;
       if (onConnected != null) {
         onConnected();
       }
-
       // List cache = <Uint8>[];
       Uint8List buffer512 = Uint8List(bufferLength);
       Uint8List cache = buffer0;
@@ -267,91 +608,75 @@ class Conn {
       int offset = 0; //0,1,2,3
       _conn?.listen((data) {
         //parse data and then call as package
-        int start = 0;
-        while (true) {
-          //get length
-          var n = 0;
-          while (offset < 4) {
-            if (offset + start >= data.length) {
-              return;
+        try {
+          int start = 0;
+          while (true) {
+            //get length
+            var n = 0;
+            while (offset < 4) {
+              if (offset + start >= data.length) {
+                return;
+              }
+              tagLen = tagLen + (data[start + offset] << (8 * (3 - offset)));
+              offset++;
+              n++;
             }
-            tagLen = tagLen + (data[start + offset] << (8 * (3 - offset)));
-            offset++;
-            n++;
-          }
-          start = n + start;
-          if (tagLen < 1) {
+            start = n + start;
+            if (tagLen < 1) {
+              //reset status
+              offset = 0;
+              tagLen = 0;
+              copyLen = 0;
+              cache = buffer0;
+              continue;
+            }
+
+            if (tagLen == cache.length) {
+              if (tagLen - copyLen > data.length - start) {
+                //data left
+                var tmpd = data.sublist(start);
+                cache.setRange(copyLen, copyLen + tmpd.length, tmpd);
+                copyLen = copyLen + tmpd.length;
+                return;
+              }
+              cache.setRange(copyLen, tagLen, data.sublist(start));
+              onData(cache);
+              start = start + tagLen - copyLen;
+            } else if (cache.isEmpty) {
+              if (tagLen > data.length - start) {
+                //data left
+                if (tagLen < bufferLength) {
+                  cache = buffer512.sublist(0, bufferLength);
+                } else {
+                  cache = Uint8List(tagLen);
+                }
+                var tmpd = data.sublist(start);
+                cache.setRange(0, tmpd.length, tmpd);
+                copyLen = tmpd.length;
+                return;
+              }
+              onData(data.sublist(start, start + tagLen));
+              start = start + tagLen;
+            } else {
+              _disconnected(NWError(NWStatus.package));
+            }
+            //get data
             //reset status
             offset = 0;
             tagLen = 0;
             copyLen = 0;
             cache = buffer0;
-            continue;
           }
-
-          // if(cache.isEmpty){
-          //   if(tagLen < bufferLength){
-          //       cache = buffer512.sublist(0, tagLen);
-          //     }else{
-          //       cache = Uint8List(tagLen);
-          //     }
-          // }
-
-          if (tagLen == cache.length) {
-            if (tagLen - copyLen > data.length - start) {
-              //data left
-              var tmpd = data.sublist(start);
-              cache.setRange(copyLen, copyLen + tmpd.length, tmpd);
-              copyLen = copyLen + tmpd.length;
-              return;
-            }
-            cache.setRange(copyLen, tagLen, data.sublist(start));
-            onData(cache);
-            start = start + tagLen - copyLen;
-          } else if (cache.length == 0) {
-            if (tagLen > data.length - start) {
-              //data left
-              if (tagLen < bufferLength) {
-                cache = buffer512.sublist(0, bufferLength);
-              } else {
-                cache = Uint8List(tagLen);
-              }
-              var tmpd = data.sublist(start);
-              cache.setRange(0, tmpd.length, tmpd);
-              copyLen = tmpd.length;
-              return;
-            }
-            onData(data.sublist(start, start + tagLen));
-            start = start + tagLen;
-          }
-          //get data
-          //reset status
-          offset = 0;
-          tagLen = 0;
-          copyLen = 0;
-          cache = buffer0;
+        } catch (e, s) {
+          _disconnected(NWError(NWStatus.package, e: e, s: s));
         }
-        //if parse header
       }, onError: (e) {
-        _disconnected();
-        if (onError != null) {
-          onError();
-        }
-
-        print("onError Socket: $e");
+        _disconnected(NWError(NWStatus.unknown, e: e));
       }, onDone: () {
-        _disconnected();
-        if (onDone != null) {
-          onDone();
-        }
-        print("onDone");
+        _disconnected(NWError(NWStatus.done));
       }, cancelOnError: cancelOnError);
-    }, onError: (e) {
-      _disconnected();
-      if (onError != null) {
-        onError();
-      }
-      print("onError Connect: $e");
+    }).onError((e, s) {
+      _disconnected(NWError(NWStatus.connectError, e: e, s: s), n: true);
     });
   }
 }
@@ -375,41 +700,63 @@ class Network {
     }
     final id = _id++;
     _conn = Conn(id, onEvent);
-    _conn?.connect('10.10.1.99', 29902,
+    //tcp 29902, tls 19708 qt, tls 20001
+    _conn!.connect('10.10.1.99', 20001,
         onConnected: onConnected,
-        timeout: const Duration(seconds: 15), onError: () {
+        timeout: const Duration(seconds: 15), onError: (NWError? e) {
+      // if(_conn == null){return;}
       if (_conn?.id != id) {
         return;
       }
       _conn = null;
-    }, onDone: () {
-      if (_conn?.id != id) {
-        return;
-      }
-      _conn = null;
-    });
+      var err = e?.err;
+      print("disconnected, try reconnect if $err");
+    }, onHeartBeat: onHeartBeat);
     return true;
   }
 
-  void onEvent(HeaderView? header, Uint8List body) {
-    if (header == null) {
-      return;
+  void onHeartBeat() {
+    var ok = send(Fids.Fids_SysHeartBeatQuery);
+    print("onHeartBeat: $ok");
+  }
+
+  void close() {
+    if (_conn != null) {
+      _conn!.close();
+      // _conn = null;
+      print("closed");
     }
-    header.view;
+  }
+
+  void onEvent(Package pkg) {
     // var hd = Header(data.sublist(0, Header.headerLength));
-    print("on event: $header, $body");
+    print("on event: $pkg");
   }
 
-  bool? write(Uint8List header, {Uint8List? body}) {
-    return _conn?.write(header, body: body);
-  }
-
-  bool? query(Header header, {GeneratedMessage? q, NWQueryCallback? r}) {
+  Future<Package> query(ProtobufEnum fid, {GeneratedMessage? q}) async {
+    if (_conn == null) {
+      var c = Completer<Package>();
+      c.completeError(NWError(NWStatus.unconnected));
+      return c.future;
+    }
+    var header = Header.build(fid);
     if (q != null) {
       Uint8List body = q.writeToBuffer();
-      return _conn?.query(header, callback: r, body: body);
+      return _conn!.query(header, body: body);
     }
-    return _conn?.query(header, callback: r);
+    return _conn!.query(header);
+  }
+
+  bool send(ProtobufEnum fid, {GeneratedMessage? q}) {
+    if (_conn == null) {
+      return false;
+    }
+    var header = Header.build(fid);
+    if (q != null) {
+      Uint8List body = q.writeToBuffer();
+      return _conn!.send(header, body: body);
+    }
+    return _conn!.send(header);
   }
 }
 
