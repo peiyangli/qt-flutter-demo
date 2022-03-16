@@ -7,3 +7,6 @@
 /chat/android
 /chat/build
 /chat/*.lock
+/chat/proto/protoc-3.17.3-win64
+/chat/proto/build
+/chat/test

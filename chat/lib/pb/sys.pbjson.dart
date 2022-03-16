@@ -1,6 +1,6 @@
 ///
 //  Generated code. Do not modify.
-//  source: sys_jh.proto
+//  source: sys.proto
 //
 // @dart = 2.12
 // ignore_for_file: annotate_overrides,camel_case_types,unnecessary_const,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type,unnecessary_this,prefer_final_fields,deprecated_member_use_from_same_package
@@ -92,12 +92,12 @@ final $typed_data.Uint8List sysHeartBeatQueryResponseDescriptor = $convert.base6
 const SysTimeQuery$json = const {
   '1': 'SysTimeQuery',
   '2': const [
-    const {'1': 'tt', '3': 1, '4': 1, '5': 14, '6': '.pbjh.SysTimeTypes', '10': 'tt'},
+    const {'1': 'tt', '3': 1, '4': 1, '5': 14, '6': '.pb.SysTimeTypes', '10': 'tt'},
   ],
 };
 
 /// Descriptor for `SysTimeQuery`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List sysTimeQueryDescriptor = $convert.base64Decode('CgxTeXNUaW1lUXVlcnkSIgoCdHQYASABKA4yEi5wYmpoLlN5c1RpbWVUeXBlc1ICdHQ=');
+final $typed_data.Uint8List sysTimeQueryDescriptor = $convert.base64Decode('CgxTeXNUaW1lUXVlcnkSIAoCdHQYASABKA4yEC5wYi5TeXNUaW1lVHlwZXNSAnR0');
 @$core.Deprecated('Use sysTimeQueryResponseDescriptor instead')
 const SysTimeQueryResponse$json = const {
   '1': 'SysTimeQueryResponse',
@@ -111,10 +111,13 @@ final $typed_data.Uint8List sysTimeQueryResponseDescriptor = $convert.base64Deco
 @$core.Deprecated('Use sysCheckAccountQueryDescriptor instead')
 const SysCheckAccountQuery$json = const {
   '1': 'SysCheckAccountQuery',
+  '2': const [
+    const {'1': 'account', '3': 1, '4': 1, '5': 11, '6': '.pb.IdName', '10': 'account'},
+  ],
 };
 
 /// Descriptor for `SysCheckAccountQuery`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List sysCheckAccountQueryDescriptor = $convert.base64Decode('ChRTeXNDaGVja0FjY291bnRRdWVyeQ==');
+final $typed_data.Uint8List sysCheckAccountQueryDescriptor = $convert.base64Decode('ChRTeXNDaGVja0FjY291bnRRdWVyeRIkCgdhY2NvdW50GAEgASgLMgoucGIuSWROYW1lUgdhY2NvdW50');
 @$core.Deprecated('Use sysCheckAccountQueryResponseDescriptor instead')
 const SysCheckAccountQueryResponse$json = const {
   '1': 'SysCheckAccountQueryResponse',
@@ -159,21 +162,69 @@ const SysHostInfo$json = const {
   '1': 'SysHostInfo',
   '2': const [
     const {'1': 'name', '3': 2, '4': 1, '5': 9, '10': 'name'},
-    const {'1': 'addrs', '3': 4, '4': 3, '5': 11, '6': '.pbjh.SysAddrInfo', '10': 'addrs'},
+    const {'1': 'addrs', '3': 4, '4': 3, '5': 11, '6': '.pb.SysAddrInfo', '10': 'addrs'},
   ],
 };
 
 /// Descriptor for `SysHostInfo`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List sysHostInfoDescriptor = $convert.base64Decode('CgtTeXNIb3N0SW5mbxISCgRuYW1lGAIgASgJUgRuYW1lEicKBWFkZHJzGAQgAygLMhEucGJqaC5TeXNBZGRySW5mb1IFYWRkcnM=');
-@$core.Deprecated('Use sysHostsQueryResponseDescriptor instead')
-const SysHostsQueryResponse$json = const {
-  '1': 'SysHostsQueryResponse',
+final $typed_data.Uint8List sysHostInfoDescriptor = $convert.base64Decode('CgtTeXNIb3N0SW5mbxISCgRuYW1lGAIgASgJUgRuYW1lEiUKBWFkZHJzGAQgAygLMg8ucGIuU3lzQWRkckluZm9SBWFkZHJz');
+@$core.Deprecated('Use sysImHostsQueryResponseDescriptor instead')
+const SysImHostsQueryResponse$json = const {
+  '1': 'SysImHostsQueryResponse',
   '2': const [
     const {'1': 'proxy', '3': 1, '4': 1, '5': 8, '10': 'proxy'},
     const {'1': 'iso2', '3': 2, '4': 1, '5': 9, '10': 'iso2'},
-    const {'1': 'hosts', '3': 4, '4': 3, '5': 11, '6': '.pbjh.SysHostInfo', '10': 'hosts'},
+    const {'1': 'hosts', '3': 4, '4': 3, '5': 11, '6': '.pb.SysHostInfo', '10': 'hosts'},
   ],
 };
 
-/// Descriptor for `SysHostsQueryResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List sysHostsQueryResponseDescriptor = $convert.base64Decode('ChVTeXNIb3N0c1F1ZXJ5UmVzcG9uc2USFAoFcHJveHkYASABKAhSBXByb3h5EhIKBGlzbzIYAiABKAlSBGlzbzISJwoFaG9zdHMYBCADKAsyES5wYmpoLlN5c0hvc3RJbmZvUgVob3N0cw==');
+/// Descriptor for `SysImHostsQueryResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List sysImHostsQueryResponseDescriptor = $convert.base64Decode('ChdTeXNJbUhvc3RzUXVlcnlSZXNwb25zZRIUCgVwcm94eRgBIAEoCFIFcHJveHkSEgoEaXNvMhgCIAEoCVIEaXNvMhIlCgVob3N0cxgEIAMoCzIPLnBiLlN5c0hvc3RJbmZvUgVob3N0cw==');
+@$core.Deprecated('Use iDBussinessOpenIDInfoDescriptor instead')
+const IDBussinessOpenIDInfo$json = const {
+  '1': 'IDBussinessOpenIDInfo',
+  '2': const [
+    const {'1': 'bid', '3': 1, '4': 1, '5': 3, '10': 'bid'},
+    const {'1': 'btm', '3': 2, '4': 1, '5': 3, '10': 'btm'},
+    const {'1': 'uid', '3': 4, '4': 1, '5': 3, '10': 'uid'},
+  ],
+};
+
+/// Descriptor for `IDBussinessOpenIDInfo`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List iDBussinessOpenIDInfoDescriptor = $convert.base64Decode('ChVJREJ1c3NpbmVzc09wZW5JREluZm8SEAoDYmlkGAEgASgDUgNiaWQSEAoDYnRtGAIgASgDUgNidG0SEAoDdWlkGAQgASgDUgN1aWQ=');
+@$core.Deprecated('Use sysConfigQueryDescriptor instead')
+const SysConfigQuery$json = const {
+  '1': 'SysConfigQuery',
+  '2': const [
+    const {'1': 'names', '3': 2, '4': 3, '5': 9, '10': 'names'},
+    const {'1': 'mtm', '3': 3, '4': 1, '5': 3, '10': 'mtm'},
+  ],
+};
+
+/// Descriptor for `SysConfigQuery`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List sysConfigQueryDescriptor = $convert.base64Decode('Cg5TeXNDb25maWdRdWVyeRIUCgVuYW1lcxgCIAMoCVIFbmFtZXMSEAoDbXRtGAMgASgDUgNtdG0=');
+@$core.Deprecated('Use sysConfigDescriptor instead')
+const SysConfig$json = const {
+  '1': 'SysConfig',
+  '2': const [
+    const {'1': 'ctm', '3': 2, '4': 1, '5': 3, '10': 'ctm'},
+    const {'1': 'mtm', '3': 3, '4': 1, '5': 3, '10': 'mtm'},
+    const {'1': 'status', '3': 4, '4': 1, '5': 3, '10': 'status'},
+    const {'1': 'name', '3': 5, '4': 1, '5': 9, '10': 'name'},
+    const {'1': 'cs', '3': 6, '4': 1, '5': 9, '10': 'cs'},
+    const {'1': 'cb', '3': 7, '4': 1, '5': 12, '10': 'cb'},
+  ],
+};
+
+/// Descriptor for `SysConfig`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List sysConfigDescriptor = $convert.base64Decode('CglTeXNDb25maWcSEAoDY3RtGAIgASgDUgNjdG0SEAoDbXRtGAMgASgDUgNtdG0SFgoGc3RhdHVzGAQgASgDUgZzdGF0dXMSEgoEbmFtZRgFIAEoCVIEbmFtZRIOCgJjcxgGIAEoCVICY3MSDgoCY2IYByABKAxSAmNi');
+@$core.Deprecated('Use sysConfigQueryResponseDescriptor instead')
+const SysConfigQueryResponse$json = const {
+  '1': 'SysConfigQueryResponse',
+  '2': const [
+    const {'1': 'data', '3': 3, '4': 3, '5': 11, '6': '.pb.SysConfig', '10': 'data'},
+  ],
+};
+
+/// Descriptor for `SysConfigQueryResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List sysConfigQueryResponseDescriptor = $convert.base64Decode('ChZTeXNDb25maWdRdWVyeVJlc3BvbnNlEiEKBGRhdGEYAyADKAsyDS5wYi5TeXNDb25maWdSBGRhdGE=');

@@ -1,0 +1,227 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "./pb;pb";
+option java_package = "com.woyue.im";
+option java_outer_classname = "PbSign";
+// option objc_class_prefix = "V2_";
+//the same as pb_qrcode
+//=============================================================================================================================
+message SignSign{
+    string e = 1; //encoder key
+    string k = 2; //key
+    bytes s = 3; //sign
+}
+
+message SignInfo{
+    uint32 t = 3; //type
+    bytes d = 6; //the data
+}
+
+
+message Sign{
+    uint64 r = 1 [jstype=JS_STRING]; //random key
+    uint32 n = 4; //default 0 , nothing; 1, aes128 salt r, maybe see pb_types.SignEncodeTypes
+    SignInfo info = 2;
+    SignSign sign = 3;
+}
+
+//=============================================================================================================================
+//=============================================================================================================================
+message SignJsonSign{
+    string e = 1; //encoder key
+    string k = 2; //key
+    string s = 3; //sign, base64(s)
+}
+
+message SignJsonInfo{
+    uint32 t = 3; //type
+    string d = 6; //the data, , base64(s)
+}
+
+
+message SignJson{
+    uint64 r = 1 [jstype=JS_STRING]; //random key
+    uint32 n = 4; //default 0 , nothing; 1, aes128 salt r, maybe see pb_types.SignEncodeTypes
+    SignJsonInfo info = 2;
+    SignJsonSign sign = 3;
+}
+
+//=============================================================================================================================
+
+
+
+
+message TempTokenSign{
+//    int64 tm = 1;
+    int64 expire = 2;
+    int64 uid = 4 [jstype=JS_STRING];
+    string devid = 6;
+}
+//=============================================================================================================================
+
+message GroupQrCode{
+    int64 tm = 1;
+//    int64 expire = 2;
+
+    int64 uid = 4 [jstype=JS_STRING];
+    int64 gid = 5 [jstype=JS_STRING];
+}
+
+message UserQrCode{
+    int64 tm = 1;
+//    int64 expire = 2;
+    int64 creator = 3 [jstype=JS_STRING];//who create this
+    int64 uid = 4 [jstype=JS_STRING];
+}
+
+message QrCodeSign{
+    string k = 2; //key
+    bytes s = 3; //sign
+}
+
+message QrCodeInfo{
+    uint32 t = 3; //type see QrCodeTypes
+    bytes qc = 6; //the qr_code
+}
+
+message QrCode{
+    QrCodeInfo code = 2;
+    QrCodeSign sign = 3;
+}
+
+//
+message QrCodeSignQuery{
+    uint32 t = 2; //type see QrCodeTypes
+
+    UserQrCode user = 3;
+    GroupQrCode group = 4;
+}
+
+message QrCodeSignQueryResponse{
+    string url = 2; //maybe url
+    QrCode data = 3; //type
+}
+
+//----------------------------------------------
+enum QrCodeUrlTypes {
+    QCUT_None = 0;
+    QCUT_User = 1;
+    QCUT_Group = 2;
+}
+
+enum QrCodeUrlQueryFlags{
+    QCUQF_None = 0;
+    QCUQF_Refresh = 1; //replace old one
+}
+
+message QrCodeUrlInfo{
+    QrCodeUrlTypes t = 2; //type see QrCodeTypes
+    int64 tm = 4; //by server
+    int64 creator = 6;//who create this, by server
+    int64 id = 7 [jstype=JS_STRING]; //id or group-id
+}
+enum QrCodeUrlDataTypes{
+    QCUDT_None = 0;
+    QCUDT_Sign = 1; //data sign
+    QCUDT_Big = 2;//
+}
+message QrCodeUrlData{
+    QrCodeUrlDataTypes dt = 3;//
+    bytes data = 4;//
+}
+
+//md5 sign and server-side check
+message QrCodeUrlQuery{
+    int32 flags = 1;// QrCodeUrlQueryFlags
+    QrCodeUrlTypes t = 2; //type see QrCodeTypes
+
+    int64 id = 4 [jstype=JS_STRING]; //id or group-id
+}
+
+message QrCodeUrlQueryResponse{
+    bytes data = 3; //type QrCodeUrlData
+}
+
+message QrCodeUrlCheckQuery{
+    bytes data = 3; //type QrCodeUrlData
+}
+message QrCodeUrlCheckQueryResponse{
+    QrCodeUrlInfo info = 4;//
+}
+//----------------------------------------------
+//=============================================================================================================================
+message UserBasicInfoSign{
+    int64 uid = 1 [jstype=JS_STRING];
+    int64 tm = 3; //
+    int32 osOrg = 4;//
+    int32 os = 5;
+
+    string xid = 6;
+    string name = 7;
+    string avatar = 8;//
+    string openid = 9;//
+    string ip = 10;
+    string imei = 11;
+    string unionid = 12;
+    string ud = 14; //user data
+    string sd = 15;
+    bytes any = 16;
+    string phone = 17;
+    int64 inviter = 18; //邀请人
+}
+
+message UserVipInfoSign{
+    int64 uid = 1 [jstype=JS_STRING];
+    int64 tm = 2; //
+    int32 os = 3;
+    int64 vip = 4;
+    int64 nxtm = 5;
+    string xid = 6;
+    string openid = 7;//
+    string ip = 10;
+    string ud = 13; //user data
+    string sd = 14;
+    bytes any = 16;
+}
+
+
+message AdminRealmAuthInfoSign{
+    int64 uid = 1 [jstype=JS_STRING];
+    int64 rid = 2 [jstype=JS_STRING];// realm-id
+    int64 tm = 3; //
+    int64 expire = 4; //expire time in ms
+    int32 os = 5;
+    string realm = 6; //see AdminRealmPreAuthQuery.realm
+    string ip = 7;
+    string imei = 8;
+}
+
+message UserSmsValidateSign {
+    string phone = 1;
+    int64 uid = 2 [jstype=JS_STRING];
+    uint64 expireTime = 3;
+    string randStr = 4;
+    string ip = 5;
+    string imei = 6;//
+    bytes any = 7;
+}
+
+
+message ImgCodeValidateSign {
+    string phone = 1; // 电话
+    string email = 6; // email
+    int64 uid = 2 [jstype=JS_STRING];
+    string ip = 3;
+    uint64 expireTime = 4;
+    string randStr = 5;
+}
+
+message UserEmailValidateSign {
+    string email = 1;
+    string ip = 3;
+    uint64 expireTime = 4;
+    string randStr = 5;
+    int64 uid = 6 [jstype=JS_STRING];
+}

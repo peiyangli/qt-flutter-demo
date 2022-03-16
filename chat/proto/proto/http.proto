@@ -1,0 +1,211 @@
+syntax = "proto3";
+package pb;
+
+option go_package = "./pb;pb";
+option java_package = "com.woyue.im";
+option java_outer_classname = "PbHttp";
+// option objc_class_prefix = "V2_";
+
+enum Http {
+    StatusNone               = 0;
+    StatusContinue           = 100; // RFC 7231, 6.2.1
+    StatusSwitchingProtocols = 101; // RFC 7231, 6.2.2
+    StatusProcessing         = 102; // RFC 2518, 10.1
+    StatusEarlyHints         = 103; // RFC 8297
+
+    StatusOK                   = 200; // RFC 7231, 6.3.1
+    StatusCreated              = 201; // RFC 7231, 6.3.2
+    StatusAccepted             = 202; // RFC 7231, 6.3.3
+    StatusNonAuthoritativeInfo = 203; // RFC 7231, 6.3.4
+    StatusNoContent            = 204; // RFC 7231, 6.3.5
+    StatusResetContent         = 205; // RFC 7231, 6.3.6
+    StatusPartialContent       = 206; // RFC 7233, 4.1
+    StatusMultiStatus          = 207; // RFC 4918, 11.1
+    StatusAlreadyReported      = 208; // RFC 5842, 7.1
+    StatusIMUsed               = 226; // RFC 3229, 10.4.1
+
+    StatusMultipleChoices   = 300; // RFC 7231, 6.4.1
+    StatusMovedPermanently  = 301; // RFC 7231, 6.4.2
+    StatusFound             = 302; // RFC 7231, 6.4.3
+    StatusSeeOther          = 303; // RFC 7231, 6.4.4
+    StatusNotModified       = 304; // RFC 7232, 4.1
+    StatusUseProxy          = 305; // RFC 7231, 6.4.5
+//    _                       = 306; // RFC 7231, 6.4.6 (Unused)
+    StatusTemporaryRedirect = 307; // RFC 7231, 6.4.7
+    StatusPermanentRedirect = 308; // RFC 7538, 3
+
+    StatusBadRequest                   = 400; // RFC 7231, 6.5.1
+    StatusUnauthorized                 = 401; // RFC 7235, 3.1
+    StatusPaymentRequired              = 402; // RFC 7231, 6.5.2
+    StatusForbidden                    = 403; // RFC 7231, 6.5.3
+    StatusNotFound                     = 404; // RFC 7231, 6.5.4
+    StatusMethodNotAllowed             = 405; // RFC 7231, 6.5.5
+    StatusNotAcceptable                = 406; // RFC 7231, 6.5.6
+    StatusProxyAuthRequired            = 407; // RFC 7235, 3.2
+    StatusRequestTimeout               = 408; // RFC 7231, 6.5.7
+    StatusConflict                     = 409; // RFC 7231, 6.5.8
+    StatusGone                         = 410; // RFC 7231, 6.5.9
+    StatusLengthRequired               = 411; // RFC 7231, 6.5.10
+    StatusPreconditionFailed           = 412; // RFC 7232, 4.2
+    StatusRequestEntityTooLarge        = 413; // RFC 7231, 6.5.11
+    StatusRequestURITooLong            = 414; // RFC 7231, 6.5.12
+    StatusUnsupportedMediaType         = 415; // RFC 7231, 6.5.13
+    StatusRequestedRangeNotSatisfiable = 416; // RFC 7233, 4.4
+    StatusExpectationFailed            = 417; // RFC 7231, 6.5.14
+    StatusTeapot                       = 418; // RFC 7168, 2.3.3
+    StatusMisdirectedRequest           = 421; // RFC 7540, 9.1.2
+    StatusUnprocessableEntity          = 422; // RFC 4918, 11.2
+    StatusLocked                       = 423; // RFC 4918, 11.3
+    StatusFailedDependency             = 424; // RFC 4918, 11.4
+    StatusTooEarly                     = 425; // RFC 8470, 5.2.
+    StatusUpgradeRequired              = 426; // RFC 7231, 6.5.15
+    StatusPreconditionRequired         = 428; // RFC 6585, 3
+    StatusTooManyRequests              = 429; // RFC 6585, 4
+    StatusRequestHeaderFieldsTooLarge  = 431; // RFC 6585, 5
+    StatusUnavailableForLegalReasons   = 451; // RFC 7725, 3
+
+    HttpStatusPhoneCodeAuthRequired     = 490; // BAT defined
+    HttpStatusBatNotAllow               = 491; // BAT defined
+    HttpStatusBatNeedCaptcha            = 492; // BAT defined
+    HttpStatusBatNeedPhoneCheck         = 493; // BAT defined
+
+    StatusInternalServerError           = 500; // RFC 7231, 6.6.1
+    StatusNotImplemented                = 501; // RFC 7231, 6.6.2
+    StatusBadGateway                    = 502; // RFC 7231, 6.6.3
+    StatusServiceUnavailable            = 503; // RFC 7231, 6.6.4
+    StatusGatewayTimeout                = 504; // RFC 7231, 6.6.5
+    StatusHTTPVersionNotSupported       = 505; // RFC 7231, 6.6.6
+    StatusVariantAlsoNegotiates         = 506; // RFC 2295, 8.1
+    StatusInsufficientStorage           = 507; // RFC 4918, 11.5
+    StatusLoopDetected                  = 508; // RFC 5842, 7.2
+    StatusNotExtended                   = 510; // RFC 2774, 7
+    StatusNetworkAuthenticationRequired = 511; // RFC 6585, 6
+}
+
+
+
+message UploadFileMeta{
+    //md5_size.type
+    int64 size = 1;
+
+    //append
+    int64 total = 2; //total size, if append, or size=total
+    int64 pos = 3; //if append>0, ignore original, if response, next append pos
+    bool append = 5; //if append>0, ignore original, if response, next append pos
+
+    bool original = 6; //if nor original, check is the file existed
+
+    string name = 7;
+    string md5 = 8;
+    string type = 9;
+
+    string appendid = 10;//append: when pos=0, server will create a new id, if
+
+    string id = 15;// the response id md5_size.type
+}
+
+
+enum FileUsages{
+    FU_None         = 0; //
+    FU_Announcement = 0x01;
+    FU_Avatar       = 0x10;
+    FU_Msg          = 0x20;
+    FU_MsgGroup     = 0x30;
+    FU_Moment       = 0x40;
+    FU_Report       = 0x50;
+    FU_Sticker      = 0x60;
+}
+message UploadFileMetas{
+    int32 ver = 2;//
+    FileUsages usage = 3; //short-term middle-term long-term
+    repeated UploadFileMeta metas = 4;
+}
+
+message UploadFileQueryResponse{
+    string bucket = 5;// the bucket name
+    repeated UploadFileMeta metas = 6;
+    repeated string addrs = 7; // if append file, use this host for upload more
+}
+
+
+message IpInfo {
+    // ip
+    string ip = 3;
+    // 权重
+    uint32 weight = 4;
+}
+message DomainIp {
+    // 域名
+    string domian = 3;
+    repeated IpInfo ip = 4;
+}
+
+
+message ZoneAddr{
+    string name = 2; //地址名字
+    string addr = 3; //地址
+    string pid = 4; //签名id
+    string auth = 5;//获取token路由
+}
+message ZoneInfo{
+    string name = 2; //区域名字
+    repeated ZoneAddr addrs = 4;
+}
+
+
+message DomainZoneQuery{
+    int64 ver = 3;// 本地版本号
+    bytes pubKey = 4; // 公钥 客户端生成  用于服务端加密返回
+}
+
+message DomainZoneQueryResponse{
+    int64 ver = 3;// 当前版本号
+    repeated DomainIp dns = 4;//
+    repeated ZoneInfo zones = 5;//
+    ZoneInfo global = 6;
+    int64 nowTime = 7; //服务器当前时间戳
+}
+
+
+message DomainZoneV1Query{
+    bytes q = 1;  // rsa 加密 通过服务端给的公钥  see DomainZoneQuery
+}
+
+message DomainZoneV1QueryResponse{
+    bytes res = 1; // see  DomainZoneQueryResponse  客户端自己生成私钥解密
+}
+
+
+
+enum FileResourceTypes{
+    FRT_None = 0;
+    FRT_Image = 1;
+    FRT_Video = 2;
+}
+message UploadFileInfoQE{
+    int64 uid = 1;
+    int64 sz = 2;//size
+    FileResourceTypes tf = 3;//
+    double score = 4;
+    string tag = 5;//
+    string bucket = 6;//bucket name
+    string file = 7;// file name
+    bool sens = 8; //is sensitive
+    string words = 9;
+    //    string tp = 6;// file type
+}
+
+
+message ProxyUploadQuery{
+    UploadFileInfoQE qe = 1;
+    UploadFileQueryResponse res = 2;
+    bool Sensitive = 3;
+    string bucket = 4;
+    string fileName = 5;
+    string words = 6;
+}
+
+message ProxyUploadQueryResponse{
+
+}
+

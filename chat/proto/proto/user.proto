@@ -1,0 +1,1475 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "./pb;pb";
+option java_package = "com.woyue.im";
+option java_outer_classname = "PbUser";
+// option objc_class_prefix = "V2_";
+
+import "types.proto";
+import "sign.proto";
+import "auth.proto";
+//import "google/protobuf/any.proto";
+
+
+enum UserPublicSetsSwitches{
+  UPSS_None                          = 0;
+
+  //friend apply if so
+  //pb_friend.FriendApplyTypes
+  UPSS_FriendApplyNoQrCode           = 0x1;
+  UPSS_FriendApplyNoSharedCard       = 0x2;
+  UPSS_FriendApplyNoGroupUid         = 0x4;
+  UPSS_FriendApplyNoFriendSharedCard = 0x8;
+
+  UPSS_NotFindableName               = 0x10;
+  UPSS_NotFindablePhone              = 0x20;
+  UPSS_NotFindableEmail              = 0x40;
+  UPSS_NotFindableXid                = 0x80;
+  UPSS_NotFindable                   = 0x100;
+  UPSS_NotFindableLabel              = 0x200;
+
+  UPSS_FriendApplyNoScoreList        = 0x400;
+  UPSS_FriendApplyNoQingTengWindow   = 0x800; //关闭青藤之窗添加好友渠道
+  UPSS_FriendApplyNoNearby           = 0x1000; //关闭附近聚点添加好友渠道
+  UPSS_FriendApplyNoAttentionOrFans           = 0x2000; //关闭关注/粉丝列表添加好友渠道
+
+}
+
+enum UserPublicSetsSwitchesHigh{
+  UPSSH_None                        = 0;
+  UPSSH_HideXid                     = 0x1;
+  UPSSH_HideNetInfo                 = 0x2;
+
+  UPSSH_RejectionOfGroupInvitations = 0x10;
+
+  UPSSH_NoPasswordLogin             = 0x20;
+  UPSSH_NoPhoneLogin                = 0x40;
+  UPSSH_CheckNewDevice              = 0x80;
+
+  UPSSH_NoEmailLogin                = 0x100;
+  UPSSH_CheckEmailNewDevice         = 0x200;
+}
+
+enum UserCategoryFlags{
+  UCF_None = 0;
+  UCF_Xid  = 1;
+  UCF_IG   = 0x10000; //see MsgMessageEncryptions.MME_IGA MME_IGB
+}
+
+
+
+//1 earphone， 2 input status, 4 reading status
+enum UserPrivSetsFlags{
+
+  UPSF_None                = 0;
+
+  UPSF_EarPhone            = 0x1;
+  UPSF_NoInputStatus       = 0x2;
+  UPSF_NoReadStatus        = 0x4;
+  UPSF_FaceIDOn            = 0x8;
+  UPSF_TouchIDOn           = 0x10;
+
+  //vip?
+  UPSF_NoPrintScreenNotice = 0x10000;
+}
+
+
+// Associate Degree 大专文凭
+// Vocational/Technical Secondary School Student 中专学校学生
+enum SchoolEducationDegrees{
+  SED_College     = 0; //专科
+  SED_Ungraduated = 1; //本科
+  SED_Master      = 2; //研究生
+  SED_Doctor      = 3; //博士？
+}
+enum SchoolClassTypes{
+  SCT_None   = 0;
+  SCT_Nature = 1; //自然序
+  SCT_Name   = 2; //自定义命名班级
+}
+
+enum SchoolInfoAccessFlag{
+  SIAF_None    = 0;
+  SIAF_Degree  = 0x01; //学位信息
+  SIAF_Year    = 0x02; //入学年份
+  SIAF_School  = 0x04; //学校信息
+  SIAF_Academy = 0x08; //院系信息
+  SIAF_Special = 0x10; //专业信息
+  SIAF_Class   = 0x20; //班级信息
+}
+
+
+//客户端显示组合
+enum SchoolInfoAccess{
+  SIA_None        = 0;
+  //    SIA_ALL = 0xFF;
+  SIA_Class       = 0x3f; //显示到班级
+  SIA_Degree_Year = 0x1f; //显示到学位年份
+  SIA_Special     = 0x1c; //显示到专业
+  SIA_Academy     = 0xc; //显示到学院
+  SIA_School      = 0x4;//显示到学校
+}
+
+enum OfficialFlags{
+  OF_None     = 0;
+  OF_Official = 0x01; //官方标识
+  OF_Sfz      = 0x02; //身份证认证成功
+  OF_Student      = 0x04; //学籍认证成功
+}
+
+message SchoolInfo{
+  SchoolEducationDegrees degree     = 1;
+  int32                  year2000   = 2;//入学年份
+  int64                  schoolIid  = 3;// 学校内部ID
+  int32                  academyIid = 4;//学院内部ID
+  int32                  specialIid = 5;//专业内部ID
+
+  SchoolClassTypes       classT     = 6;//非自然序
+  int32                  classIid   = 7;//自然序班级或已有班级
+
+  string                 school     = 11; //学校
+  string                 academy    = 12; //院系
+  string                 specialty  = 13; //专业
+  string                 class      = 14;//班级名称, 如果非自然序号班级
+  SchoolInfoAccess       access     = 15; //可看信息权限
+}
+
+message UserInfo{
+
+  int64      uid          = 1 [jstype = JS_STRING];
+
+  int64      ctm          = 4;
+  int64      mtm          = 5;
+
+  int32      gender       = 7;
+  int64      birthday     = 8;
+
+
+  int32      status       = 10;
+  int32      category     = 11;
+
+  int64      inviter      = 12 [jstype = JS_STRING];
+  int64      disable      = 13;
+
+  int64      switches     = 14;//flags: see UserPublicSetsSwitches
+
+  string     xid          = 15;
+  string     name         = 16;
+  string     avatar       = 17;
+
+  string     signature    = 18;
+
+  string     phone        = 19;
+  string     email        = 20;
+  string     lang         = 21;
+
+  int64      nxtm         = 22;// the nice-xid expire timestamp
+
+  int64      vip          = 23;
+  int32      grade        = 24; //the grade score for
+  string     labels       = 25; // labels, json_array: ["",""]
+  string     realn        = 26;// real name
+  bytes      sets         = 27;// settings
+  int64      official     = 28; //see OfficialFlags
+
+  int64      access       = 31;
+  int64      gid          = 32;
+  SchoolInfo student      = 33; //学校|本科|院系|专业|2000|班级|SID
+  bytes      studentBytes = 34; // SchoolStudentInfo in proto.bytes
+}
+
+//-------------------------------------------------
+
+enum UserLoginSignTypes{
+  ULST_CS           = 0x00; //cs uid sign login
+  ULST_CSV1         = 0x01; //cs uid sign login
+  ULST_UserPassword = 0x101; //srp
+  ULST_UserPhone    = 0x102; //phone code
+  ULST_UserEmail    = 0x103; //email code
+  ULST_SignPhone    = 0x110; //qt
+}
+
+message LoginWithSignQuery{
+  int64              uid  = 2 [jstype = JS_STRING];//ULST_UserPassword, uid if you have
+  UserLoginSignTypes st   = 3;//
+  int32              os   = 4;//
+  string             imei = 5; //same as sign
+  string             id   = 6;//with LWST_Phone:zone-phone, LWST_Email: email, LWST_XidPassword: xid
+  Sign               sign = 7;//phone-sign
+  UserLoginSrp2      srp2 = 8; //ULST_UserPassword
+}
+
+message LoginWithSignQueryResponse{
+  int64    uid  = 1 [jstype = JS_STRING];
+  // string addr = 4;//
+  UserNode gw   = 5;//
+  Sign     sign = 7;// login sign
+
+
+  int64    tm   = 2;//the server's time
+  UserInfo user = 8;
+  bytes    body = 9;
+}
+
+message UserAuthInfoSign{
+  UserInfo           user = 2;
+  int64              tm   = 3;//
+  UserLoginSignTypes st   = 4;//
+  int32              os   = 5;//
+  string             id   = 6;//with LWST_Phone:zone-phone, LWST_Email: email, LWST_XidPassword: xid
+  string             imei = 7; //same as sign
+  string             ip   = 8;
+}
+
+
+enum UserInfoQueryFlags{
+  UIQF_None         = 0;
+  UIQF_NoLocalCache = 1;
+  UIQF_NoCache      = 2;
+}
+message UserInfoQuery{
+  int32          flags   = 2;//
+  bool           nocache = 3;
+  repeated int64 uids    = 4 [jstype = JS_STRING];
+  string         realm   = 7;// "cs"
+}
+message UserInfoQueryResponse{
+  repeated UserInfo data = 4;
+  repeated int64    eids = 5 [jstype = JS_STRING];//failed uids
+}
+//-------------------------------------------------
+
+message UserBasicInfo{
+  int64  uid    = 1 [jstype = JS_STRING];
+  int32  gender = 7;
+  string name   = 16;
+  string lang   = 21;
+}
+
+message UserLoginDeviceInfo{
+  int32       os      = 1; //see pb_ids.OSs
+  DeviceFirms firm    = 2;
+
+  string      devInf  = 3; //
+  string      appid   = 4; //package name
+  string      version = 5;
+  string      imei    = 6; //imei id
+  string      channel = 7;
+  string      lang    = 10;//
+
+  //    string push_token = 8; //dev token, push message when offline
+  //    string voip_token = 9; //for ios voip call
+}
+
+message UserLoginSource{
+  int64 inviter = 1 [jstype = JS_STRING];
+}
+
+
+
+message UserLoginUidPassword{
+  int64  uid      = 1 [jstype = JS_STRING];
+  string password = 2;
+}
+message UserLoginUidAutoCode{
+  int64  uid  = 1 [jstype = JS_STRING];
+  string code = 2;
+}
+message UserLoginXidPassword{
+  string xid      = 1;
+  string password = 2;
+}
+message UserLoginZonePhoneCode{
+  int32              zone  = 1;
+  string             phone = 2;
+  string             code  = 3;
+  PhoneCodeAuthTypes t     = 4;//
+}
+message UserLoginEmailCode{
+  string email = 2;
+  string code  = 3;
+}
+message UserLoginNamePassword{
+  string name = 1;
+}
+
+message UserLoginUidGlobalToken{
+  int64  uid   = 1 [jstype = JS_STRING];
+  string token = 2;
+}
+
+message UserLoginUidQrCode{
+  int64  uid    = 1 [jstype = JS_STRING];  //your uid
+  //    string token = 2; //your side token
+  string token2 = 3; //other side token, md5(WSP+token2+tm+uid), md5(format("WSP~s~b~b", [Token2, Tm, Uid])).
+}
+
+//realm sign data
+message UserLoginSign{
+  UserLoginSignTypes rt   = 1;
+  Sign               sign = 3;
+}
+
+//realm sign data
+message UserLoginSignBytes{
+  UserLoginSignTypes rt   = 1;
+  bytes              sign = 3;
+}
+
+
+message UserHeaderValue{
+  string key = 1;
+  string val = 2;
+}
+message UserLoginExternalHosting{
+  int64                    uid     = 1 [jstype = JS_STRING];
+
+  string                   queries = 2; //url queries
+  bytes                    body    = 3; //this is a json params, body
+  repeated UserHeaderValue header  = 4; //header key-value pairs
+}
+
+
+message UserLoginExternalHostingAuto{
+  string token = 1; //uid info token
+  string code  = 2; //auto code
+}
+
+message UserLoginWeChat{
+}
+
+message UserLoginSrp2{
+  string k  = 2; //a key for web
+  bytes  cK = 3; //client K,
+}
+
+enum UserLoginFlags{
+  ULF_None            = 0x00;
+  ULF_CustomerService = 0x02;
+}
+
+
+message ServerProxyInfo{
+  string addr = 4;//
+}
+
+message UserLoginNewDevice{
+  UserNewDeviceLoginAuthTypes authT = 2;//
+
+  string                      k     = 4;
+  string                      v     = 5;
+  UserNewDeviceLoginInfo      info  = 7;
+}
+
+message UserLoginQuery{
+  int64                        tm        = 1;
+  UserLoginTypes               lt        = 2; //
+  UserLoginDeviceInfo          di        = 3; //devInf info
+  Location                     loc       = 4; //location
+  uint64                       flags     = 5; //login flags, see UserLoginFlags do bitwise or
+
+  UserBasicInfo                user      = 6;
+
+  string                       realm     = 7;//the realm of user, default is "", and CustomerService "cs"
+  //    google.protobuf.Any     a = 7;  //ULT_None, any login type, not supported erlang
+  UserLoginUidPassword         up        = 8;
+  UserLoginUidAutoCode         uac       = 9;
+  UserLoginXidPassword         xp        = 10;
+  UserLoginZonePhoneCode       zpc       = 11;
+  UserLoginEmailCode           ec        = 12;
+  UserLoginNamePassword        np        = 13;
+  UserLoginWeChat              wc        = 14;
+  UserLoginExternalHosting     eh        = 15;
+  UserLoginExternalHostingAuto eha       = 16;
+
+  UserLoginSrp2                srp       = 17; //srp login second step
+  UserLoginUidGlobalToken      gt        = 18; //
+  UserLoginUidQrCode           qc        = 19; //qrcode login  second step
+
+  UserLoginSign                sign      = 20;// sign data
+  UserLoginSignBytes           signBytes = 21;// sign data
+
+  UserLoginNewDevice           nd        = 22;//
+
+  ServerProxyInfo              proxy     = 29;//system value for addr
+  bytes                        any       = 30;//any other types to xx
+  string                       ver       = 31; //version of client. if none, set it to {2019.12.1}->int64
+}
+
+
+//#{?MP => ModPid0, ?OS => Os, ?TI => Time, ?TC => Time, ?FT => FirmPush0, ?TK => Token0, ?DI => DeviceInfo0},
+
+message UserLoginMutiLoginInfo{
+  int32  os      = 1;
+  int64  ti      = 2; //time login
+  int64  to      = 3; //time logout
+  int32  online  = 4; //is right now online?
+  string devInf  = 6; //
+  string version = 7; //mne
+}
+
+//enum UserLoginQueryResponseStatus{
+//    ULQRS_None = 0;
+//    ULQRS_DeviceChanged = 1;
+//}
+enum PhoneCheckStatus{
+  PCS_None   = 0;
+  PCS_Notify = 1; //need notify user
+  PCS_Verify = 2; //need verify
+}
+message UserLoginStatusInfo{
+  PhoneCheckStatus pcs = 3; //phone check status
+  int64            pti = 4;//latest phone login time
+  int64            ptn = 5;//phone login time: start note time
+  int64            ptv = 6;//phone login time: start verify
+}
+message UserLoginQueryResponse{
+  //todo add auto login info
+  int64                           tm      = 1;//the server's time
+  string                          token   = 2; //server data
+
+  int64                           disable = 3;// you'v been disabled, this is the deadline in ms
+  int64                           status  = 4; //if destroy
+  bool                            devchg  = 5; //dev changed before last login
+
+  repeated UserLoginMutiLoginInfo info    = 6; //mutilogin info
+
+  UserInfo                        user    = 7;
+
+  bytes                           body    = 8;
+
+  UserLoginStatusInfo             si      = 9;//login status info
+
+  UserNode                        gw      = 10;//
+}
+message EqUserLoginQuery{
+  int64               tm  = 1;
+  UserLoginTypes      lt  = 2;
+  UserLoginDeviceInfo di  = 3;
+
+  string              ip  = 6; //ip
+  string              loc = 7; //location
+}
+
+
+//ModifyPhoneEmailMutualQuery  ModifyPhoneBypasswdQuery UserPhoneCheckQuery
+enum UserPhoneCheckModifyHows{
+  UPCMH_None                        = 0;
+  UPCMH_UserPhoneCheckQuery         = 1;
+  UPCMH_ModifyPhoneEmailMutualQuery = 2;
+  UPCMH_ModifyPhoneBypasswdQuery    = 3;
+  UPCMH_UserModifyPhoneQuery        = 4;
+}
+message UserPhoneCheckOKQuery{
+  UserPhoneCheckModifyHows how  = 3;//
+  bytes                    sign = 7;//sign data, pb.Sign -> {UserPhoneCheckQuery:UserPhoneCheckQuerySign, }
+}
+message UserPhoneCheckOKQueryResponse{
+
+}
+//====================================================================
+message EqUserRedirectionEvent{
+  string host = 3;//
+}
+
+
+message UserHostQuery{
+  int32 os  = 2; //your os
+  int64 uid = 3 [jstype = JS_STRING]; //your uid
+}
+message UserHostQueryResponse{
+  // string host = 3;//
+  UserNode gw = 4;//
+}
+//====================================================================
+//====================================================================
+//http for mobile to disable apns
+//tcp for web-socket to sign-out
+message UserSignOutQuery{
+
+}
+message UserSignOutQueryResponse{
+
+}
+//when web SignOut, send an msg to Mobiles
+message UserSignOutQueryEvent{
+
+}
+
+
+message UserKickOutWebQuery{
+}
+message UserKickOutWebQueryResponse{
+  int64 n = 2;
+}
+//when web SignOut, send an msg to Mobiles
+message UserKickOutWebQueryEvent{
+}
+//=======================================================================
+//====================================================================
+// this is the qrcode.encode info
+message UserWSQrCodeLoginQrCode{
+  //    int64 tm = 2;
+  int64  tm     = 3;
+  string key    = 4; //serve side key
+  string devInf = 5;//your devInf info
+  string ip     = 6;
+  bytes  pub    = 7; //ecc public key1
+}
+
+message UserContactInfo{
+  int64   id     = 1 [jstype = JS_STRING]; //gid or uid or?
+  IdTypes idt    = 2;
+  string  name   = 4;
+  string  avatar = 5;
+}
+
+message UserWSQrCodeLoginEccData{
+  int64                    uid      = 1 [jstype = JS_STRING];
+  string                   key      = 3; //serve side key
+  string                   token2   = 4; //must
+  string                   nonce    = 5;//nonce string
+  bytes                    mpriv    = 6; //message ecc priv
+  bytes                    mpub     = 7; //message ecc public
+  repeated UserContactInfo contacts = 8;
+
+  bytes                    mprivtmp = 9; //temp message ecc priv
+  bytes                    mpubtmp  = 10; //temp message ecc public
+}
+//---------------------
+//websocket only, scan QrCode to login
+message UserWSQrCodeLoginQuery{
+  string imei   = 4; // your imei id
+  string devInf = 5;//you devInf info
+  string nonce  = 6;//nonce string
+  bytes  pub    = 7; //ecc public key1
+}
+message UserWSQrCodeLoginQueryResponse{
+  int64  tm    = 2; //old tm in
+  string token = 3; //you keep it while reset
+  Sign   qc    = 4; //QrCodeInfo t and then qc=UserWSQrCodeLoginQrCode
+}
+//---------------------
+message UserWSQrCodeReconnectedQuery{
+  int64  tm     = 2; //old tm in UserWSQrCodeLoginQueryResponse.tm
+  string token  = 3; //see UserWSQrCodeLoginQueryResponse.token
+  string imei   = 4; // your imei id
+  string devInf = 5;//you devInf info
+  string nonce  = 6;//nonce string
+}
+message UserWSQrCodeReconnectedQueryResponse{
+  int64 n     = 2;
+  bytes infob = 7; //binary of UserWSQrCodeLoginEccInfo
+}
+
+//---------------------
+message UserWSQrCodeLoginEccInfo{
+  int64 uid  = 1 [jstype = JS_STRING]; //
+  bytes pub  = 6; //your ecc public key2
+  bytes data = 7; //your ecc.encoded data. see UserWSQrCodeLoginEccData
+  //    bytes data_test = 8; //for test only
+}
+//---------------------
+message UserWSQrCodeAllowLoginQuery{
+  Sign                     qc     = 4; // your scan qrcode
+  string                   token2 = 5; //same as UserWSQrCodeLoginEccData.token2, who can decode data and login by token2
+  string                   ws     = 6;//
+  UserWSQrCodeLoginEccInfo info   = 7; //
+}
+message UserWSQrCodeAllowLoginQueryResponse{
+  int64 n = 2;
+}
+//---------------------
+message EqUserWSQrCodeAllowLoginQueryEvent{
+  string                   ws   = 6;//ws host for login
+  UserWSQrCodeLoginEccInfo info = 7; //binary of UserWSQrCodeLoginEccInfo
+}
+//====================================================================
+//====================================================================
+//login as CustomerService or cancel, you must be a CS
+enum UserUpdateCustomerServiceActions{
+  UUCSA_StartWork  = 0;
+  UUCSA_StopWork   = 1;
+  UUCSA_CheckWork  = 2;
+  UUCSA_PauseWork  = 3;
+  UUCSA_ResumeWork = 4;
+}
+message UserUpdateCustomerServiceQuery{
+  UserUpdateCustomerServiceActions action = 1; //UserUpdateCustomerServiceActions tobe=1, or not tobe 0
+}
+message UserUpdateCustomerServiceQueryResponse{
+  int32 working = 1;
+  int32 pause   = 2;
+}
+
+//call by CS
+message UserCustomerServiceDoneQuery{
+  int64 uid = 1 [jstype = JS_STRING];   //other id, if uid=200,
+}
+message UserCustomerServiceDoneQueryResponse{}
+
+
+message UserCustomerServiceHelpQuery{
+  int32  gender   = 1;
+  uint64 version  = 2; //A.B.C (A bsl 48) bor (B bsl 32) bor C. % <<A:16, B:16, C:32>>.
+  string language = 4;//
+}
+message UserCustomerServiceHelpQueryResponse{
+  int64  uid     = 1 [jstype = JS_STRING]; //cs uid, if zero, no cs
+  int64  version = 3; // current help version
+  string help    = 4; //help content
+}
+
+
+message UserOnlineInfoQuery{
+  int64 uid = 1 [jstype = JS_STRING]; //who's info
+}
+message UserOnlineInfoQueryResponse{
+  repeated UserLoginMutiLoginInfo info = 6;
+}
+
+//====================================================================
+
+
+enum UserPrivPasswordSwitches{
+  UPPS_None    = 0;
+  UPPS_Login   = 1;
+  UPPS_Lock    = 2; //pwd_lock on?
+  UPPS_Destroy = 4; //pwd_destroy on?
+}
+
+enum UserPasswordModifyAuthTypes{
+  UPMAT_None    = 0;
+  UPMAT_Phone   = 1;
+  UPMAT_Email   = 2;
+  UPMAT_Login   = 3;
+  UPMAT_Lock    = 4;
+  UPMAT_Destroy = 5;
+}
+
+message SrpInfo{
+  string i = 1; //id
+  bytes  s = 2; //s
+  bytes  v = 3; //v
+}
+
+
+enum PasswordTypes{
+  PT_None = 0; //simple
+  PT_Raw  = 1;
+  PT_Hash = 2; //md5(md5(uid+pwd+salt0)+salt1)
+  PT_Srp  = 3;
+}
+message PasswordInfo{
+  PasswordTypes t    = 1;
+  SrpInfo       srp  = 4; //PT_Srp
+  bytes         data = 7; //binary info, PT_None, PT_Raw, PT_Hash
+}
+
+message UserSrp1Query{
+  int64                    uid           = 2 [jstype = JS_STRING];//
+  UserPrivPasswordSwitches switch        = 3;// switch of UserPasswordSwitches is available, do srp1
+  string                   xid           = 4;//for some
+  CaptchaDataAnswerSign    signatureSign = 6; // 图片认证的签名
+  bytes                    cA            = 7; //client A
+}
+
+message UserSrp1Result{
+  UserPrivPasswordSwitches switch = 3; //if needs
+  string                   k      = 4; //for web
+  string                   ci     = 5; //client id, uuid
+  bytes                    sB     = 6;  //server B
+  bytes                    cs     = 7;  //client s set before,
+}
+
+message UserSrp1QueryResponse{
+  int64          uid = 2 [jstype = JS_STRING];//if by xid
+  UserSrp1Result r   = 4;
+
+  UserNode       gw  = 7;//gw for login or check your srp2
+}
+
+message UserSrp2Query{
+  UserPrivPasswordSwitches switch   = 3;
+  //    UserPasswordModifyAuthInfo info = 4;
+  UserLoginSrp2            srp2     = 6;
+  bool                     signFlag = 7; //true 响应会返签名
+  bool                     xid      = 8; //签名是否需要xid
+}
+message UserSrp2QueryResponse{
+  bytes sign = 1;
+}
+
+//====================================================================
+enum UserSignUpType{
+  USUT_None          = 0x00;
+  USUT_NameSrpSV     = 0x01;
+  USUT_ZonePhoneCode = 0x02;
+  USUT_EmailCode     = 0x03;
+  USUT_NamePassword  = 0x04;
+  USUT_UserWoWID     = 0x05;
+}
+message UserInviterInfo{
+  int64 uid  = 3 [jstype = JS_STRING]; //the inviter's uid
+  bytes sign = 7;// SignInvitationInfo
+}
+
+message UserSignUpNameSrpSV{
+  string  name = 3;
+  SrpInfo srp  = 4;
+  //    string i = 5; //uuid
+  //    string s = 6;
+  //    string v = 7;
+}
+
+
+message UserSignUpZonePhoneCode{
+  int32              zone  = 1;
+  string             phone = 2;
+  string             code  = 3;
+  PhoneCodeAuthTypes t     = 4;//
+  Sign               sign  = 6;//
+}
+
+message UserSignUpEmailCode{
+  string email = 2;
+  string code  = 3;
+}
+
+
+message UserSignUpQuery{
+  StrKeyVal               captcha     = 2; //check captcha
+
+  UserSignUpType          type        = 3; //login type
+
+  UserLoginDeviceInfo     di          = 4; //devInf info
+  UserInviterInfo         inviter     = 5; //inviter info
+
+  Sign                    signCaptcha = 6;//
+
+  UserSignUpNameSrpSV     srp         = 8; //srp info
+  UserSignUpZonePhoneCode zpc         = 9;
+  UserSignUpEmailCode     ec          = 10;
+}
+
+
+message UserBasicInfoSignQuery{
+  //make a sign for user
+  string ud = 5;//user data
+}
+message UserBasicInfoSignQueryResponse{
+  //make a sign for user
+  int64  expire = 3;//
+  string sd     = 5;//server data
+  bytes  sign   = 6;//yes sign info
+}
+
+// message UserBasicInfoSignData{
+//     int64 uid = 1 [jstype=JS_STRING];
+//     string sd = 3;//
+//     string nonce = 4;//
+//     bytes sign = 6;
+// }
+
+
+
+//-----------------------------------------------
+enum UserBasicInfoThirdSignTypes{
+  UBITST_Json  = 0;
+  UBITST_Proto = 1;
+}
+message UserBasicInfoThirdSignQuery{
+  //make a sign for user
+  int32 os = 1;//sign for os
+  UserBasicInfoThirdSignTypes st  = 2;//
+  string                      tid = 3;//third-id
+  string                      td  = 4;//third-in
+  string                      ud  = 5;//user data
+}
+message UserBasicInfoThirdSignQueryResponse{
+  //make a sign for user
+  int64  expire = 3;//
+  string sd     = 5;//server data
+  bytes  sign   = 6;//yes sign info
+}
+
+// message UserBasicInfoThirdSignData{
+//     int64 uid = 1 [jstype=JS_STRING];
+//     string sd = 3;//
+//     string nonce = 4;//
+//     bytes sign = 6;
+// }
+
+message UserBasicInfoSignForTokenQuery{
+  // int64 expire = 3;//
+  string td         = 4;//third-in
+  string ud         = 5;//user data
+  string sd         = 6;//server data
+
+  bool   isSignJson = 7;// is string sign
+  bytes  sign       = 8;//yes sign info, in json
+  string signJson   = 9;// string sign
+}
+message UserBasicInfoSignForTokenQueryResponse{
+  int64  expire = 3; //
+  string token  = 4; // user temp-token info
+//  int64  uid    = 5[jstype = JS_STRING]; // uid
+  string key = 5;//
+  UserInfo  user = 6;
+}
+
+message BatUserBasicInfoSignForTokenQuery{
+  // int64 expire = 3;//
+  string td   = 4;//third-in
+  string ud   = 5;//user data
+  string sd   = 6;//server data
+  bytes  sign = 8;//yes sign info, in json
+}
+message BatUserBasicInfoSignForTokenQueryResponse{
+  int64  expire = 3; //
+  string token  = 4; // user temp-token info
+}
+
+// http header
+// X-Uid: uid
+// X-Auth: pb(UserXAuthInfo).base64
+message UserXAuthHeader{
+  int64  uid       = 2 [jstype = JS_STRING]; //must be same with X-Uid: uid
+  string qid       = 3;
+  string nonce     = 4;
+  int64  timestamp = 5;
+  int32  os        = 6;//
+  string token     = 7;//token from your local-token
+  string language  = 8;
+  int32  timezone  = 9;
+  string imei      = 10;// hash(imei...)
+  string version   = 11;
+}
+//-----------------------------------------------
+
+
+enum UserSignUpResponseFlags{
+  USURF_None        = 0;
+  USURF_NewAccount  = 0x1;
+  USURF_ValidInvite = 0x2;
+}
+message UserSignUpQueryResponse{
+  int64  uid   = 1 [jstype = JS_STRING];
+  int64  flags = 2; //if see UserSignUpResponseFlags
+  int64  dtm   = 3;
+  string xid   = 4;
+  string name  = 5;//if no name you set
+  string token = 7;  //for login later
+
+  string addr  = 8;//
+  Sign   sign  = 9;// login sign
+}
+
+//---------
+message UserSignUpWoWID{
+  string id   = 3;// the wowo id
+  string rand = 4;//
+  string sign = 5;//
+}
+
+message WowPhoneCode{
+  string             phone = 2;
+  string             code  = 3;
+  PhoneCodeAuthTypes t     = 4;//
+  Sign               sign  = 6;//
+}
+message WowUserInfo{
+  string name = 2;//
+}
+//wow login
+message UserSignUpWowQuery{
+  int64               tm      = 1;//
+  UserSignUpWoWID     wow     = 3;// the wowo id
+  UserLoginDeviceInfo di      = 4; //devInf info
+  UserInviterInfo     inviter = 5; //inviter info
+  WowUserInfo         user    = 6;//
+  WowPhoneCode        pc      = 9;
+}
+//see new version of UserSignUpQueryResponse
+message UserSignUpWowQueryResponse{
+  int64  uid   = 1 [jstype = JS_STRING];
+  int64  flags = 2; //if see UserSignUpResponseFlags
+  int64  dtm   = 3;
+  string xid   = 4;
+  string name  = 5;//if no name you set
+  string token = 7;  //for login later
+
+  string addr  = 8;//
+  Sign   sign  = 9;// login sign
+}
+//
+message UserSignUpWowCheckQuery{
+  int64               tm  = 2;
+  UserSignUpWoWID     wow = 4;//
+  UserLoginDeviceInfo di  = 7;// devInf
+}
+
+enum UserSignUpWowCheckCode{
+  USUWCC_None         = 0;
+  USUWCC_Registered   = 1;
+  USUWCC_UnRegistered = 2;
+  USUWCC_Forbidden    = 3;
+  USUWCC_Unknown      = 4;
+}
+message UserSignUpWowCheckQueryResponse{
+  UserSignUpWowCheckCode code = 2;//
+  UserInfo               user = 4;//phone number
+}
+//---------
+//====================================================================
+
+//-----------------------------------------------
+message UserGroupRoleSignQuery{
+  //make a sign for user
+  int64  gid = 1 [jstype = JS_STRING];
+  string tid = 3;//third-id
+  string ud  = 5;//user data
+}
+message UserGroupRoleSignQueryResponse{
+  //make a sign for user
+  int64  tm   = 3;//
+  string sd   = 5;//server data
+  bytes  sign = 6;//yes sign info
+}
+// //UserBasicInfoSign
+// message UserGroupRoleSignData{
+//     int64 uid = 1 [jstype=JS_STRING];
+//     string sd = 3;//
+//     string nonce = 4;//
+//     bytes sign = 6;
+// }
+message UserGroupRoleSign{
+  int64      uid    = 1 [jstype = JS_STRING];
+  int64      gid    = 2 [jstype = JS_STRING];
+  int64      tm     = 3; //
+  int32      os     = 4;
+  GroupRoles role   = 5; //
+  string     xid    = 6;
+  string     name   = 7;
+  string     avatar = 8;//
+  string     openid = 9;//
+  string     ip     = 10;
+  string     imei   = 11;
+  string     ud     = 14; //user data
+  string     sd     = 15;
+  bytes      any    = 16;
+}
+//-----------------------------------------------
+
+//====================================================================
+message UserApnsSetTokenQuery{
+  int64       luid  = 2 [jstype = JS_STRING]; //last uid of this token
+  DeviceFirms firm  = 3;
+  string      token = 4;
+  string      lang  = 5; //your language
+}
+message UserApnsSetTokenQueryResponse{
+  int64 n = 2;
+}
+
+enum UserApnsQuietFlags{
+  UAQF_None     = 0;
+  UAQF_UseValue = 0x01;
+}
+enum UserApnsQuietValues{
+  UAQV_None     = 0;
+  UAQV_OnlyAtMe = 1;
+  UAQV_BlockAll = 2;
+}
+message UserApnsSetQuietQuery{
+  int32               flags  = 1;
+  UserApnsQuietValues val    = 2; //new values
+  bool                on     = 3; //on or off
+  repeated int64      uids   = 4 [jstype = JS_STRING]; //friend id no apns
+  repeated int64      gids   = 5 [jstype = JS_STRING]; //group id no apns
+
+  repeated int64      global = 6; //if set global value, and ignore the on value
+
+  repeated int64      sids   = 7 [jstype = JS_STRING]; //group id no apns
+}
+message UserApnsSetQuietQueryResponse{
+  int64 n = 2;
+}
+
+message UserApnsInfoAllQuery{}
+message UserApnsInfoAllQueryResponse{
+  int64          global = 3;
+  repeated int64 uids   = 4 [jstype = JS_STRING]; //friend id no apns
+  repeated int64 gids   = 5 [jstype = JS_STRING]; //group id no apns
+  repeated int64 sids   = 6 [jstype = JS_STRING]; //server id no apns
+}
+message UserApnsSettings{
+  int64               id  = 1 [jstype = JS_STRING];//uid or gid
+  UserApnsQuietValues val = 2;//the val
+}
+
+message UserApnsInfoAllV2Query{}
+message UserApnsInfoAllV2QueryResponse{
+  int64                     global = 3;
+  repeated UserApnsSettings uids   = 4; //friend id no apns
+  repeated UserApnsSettings gids   = 5; //group id no apns
+  repeated UserApnsSettings sids   = 6; //server id no apns
+}
+
+message UserApnsInfoOneQuery{
+  IdTypes idt = 2;
+  int64   id  = 3; //friend id
+}
+message UserApnsInfoOneQueryResponse{
+  int64 status = 3; //your settings
+}
+//====================================================================
+//====================================================================
+enum UserOnlineInfoFlags{
+  UOIF_None   = 0;
+  UOIF_Hidden = 1;
+}
+message UserOnlineInfo{
+  int64                           uid   = 1 [jstype = JS_STRING];
+  int32                           flags = 3; //see UserOnlineInfoFlags
+  repeated UserLoginMutiLoginInfo info  = 6;
+}
+message UserOnlineInfosQuery{
+  repeated int64 uids = 1 [jstype = JS_STRING]; //[1, 50]?
+}
+message UserOnlineInfosQueryResponse{
+  repeated UserOnlineInfo data = 4;
+}
+//====================================================================
+message UserBasicInfoModifyQuery{
+  Sign            sign      = 4;//some fields need this one
+  repeated int32  gender    = 7;
+  repeated int64  birthday  = 8;
+
+  repeated string name      = 16;
+  repeated string avatar    = 17;
+
+  repeated string signature = 18;
+  repeated string lang      = 19;
+
+  repeated Labels labels    = 20; // add to search?
+  repeated bytes  sets      = 21;//
+}
+enum UserBasicInfoModifyErrors{
+  UBIME_None = 0;
+  UBIME_Unkown  =0x1;
+  UBIME_NoFileds  =0x2;
+  UBIME_Gender  =0x11;
+  UBIME_Birthday  =0x12;
+  UBIME_Name  =0x13;
+  UBIME_Avatar  =0x14;
+  UBIME_Signature  =0x15;
+  UBIME_Lang  =0x16;
+  UBIME_Labels  =0x17;
+  UBIME_Sets  =0x18;
+}
+message UserBasicInfoModifyQueryResponse{
+  int64 n        = 3;
+  int64 official = 4;
+
+  UserBasicInfoModifyErrors e = 7; //error
+}
+
+message UserSetSwitchesQuery{
+  int64 ons  = 2;
+  int64 offs = 3;
+  bytes sign = 6;//the phone sign for
+  //    bool on = 1; //on and off
+  //    UserPublicSetsSwitches switches = 14;//flags: see UserPublicSetsSwitches
+}
+
+message UserSetSwitchesQueryResponse{
+  int64 n        = 2;
+  int64 switches = 4;//
+}
+//====================================================================
+// grade score 等级积分
+
+enum ScoreEids{
+  SE_None             = 0;
+  SE_Login            = 5; //pb.Fids_UserLoginQuery
+  SE_MsgUid           = 0x10; //pb.Fids_MsgMessageToQuery
+  SE_MsgGid           = 0x11; //pb.Fids_MsgMessageToQuery
+
+  SE_Invitation       = 0x20; //pb.Fids_UserSignUpQuery
+
+  SE_FriendAdd        = 0x30; //pb.Fids_FriendAddQuery
+
+  SE_GroupJoin        = 0x41; // pb.Fids_GroupCreateQuery, pb.Fids_GroupJoinApplyQuery, pb.Fids_GroupJoinQuery
+
+  SE_MomentPost       = 0x51; // pb.Fids_QEUserMomentQuery
+  SE_BottleCreate     = 0x52; //pb.Fids_QEUserBottleCreateQuery
+  SE_BottleReply      = 0x53; //pb.Fids_QEUserBottleReplyQuery
+
+  SE_Report           = 0x61; //pb.Fids_QEUserReportQuery
+
+  SE_AccountLocation  = 0x80; //pb.Fids_UserBasicInfoModifyQuery
+  SE_AccountName      = 0x81; //pb.Fids_UserBasicInfoModifyQuery
+  SE_AccountAvatar    = 0x82; //pb.Fids_UserBasicInfoModifyQuery
+  SE_AccountGender    = 0x83; //pb.Fids_UserBasicInfoModifyQuery
+  SE_AccountBirthday  = 0x84; //pb.Fids_UserBasicInfoModifyQuery
+  SE_AccountSignature = 0x85; //pb.Fids_UserBasicInfoModifyQuery
+  SE_AccountLabels    = 0x86; //pb.Fids_UserBasicInfoModifyQuery
+
+  SE_SignInScore      = 0x87; //pb.Fids_QEUserSignInScoreQuery
+  SE_SignDial         = 0x89; //pb.Fids_QEUserSignDialScoreQuery
+  SE_DailyTask        = 0x8A; //pb.Fids_QEUserDailyTaskScoreQuery
+  SE_ContinueLogin    = 0x8B;//pb.Fids_UserLoginQuery,Fids_ScoreContinueLoginQuery
+  SE_IllegalResource  = 0x8C;//pb.Fids_ScoreIllegalResource
+  SE_Exchange         = 0x8D;//pb.Fids_ScoreExchange
+  SE_AccountRecord =  0x8E; //个人档案
+  SE_QingtengPost = 0x8F; //青藤之窗帖子
+  SE_QingtengComment = 0x90; //青藤之窗评论
+  SE_QingtengZan = 0x91; //青藤之窗点赞
+  SE_QingtengDraft = 0x92; //青藤之窗稿子
+  SE_PointMsg = 0x93; //附近聚点发送消息
+}
+
+
+enum UserGenderFlags{
+  UGF_None     = 0;
+  UGF_Modified = 0x0100;
+  // 修改卡
+  UGF_Card     = 0x0200;
+}
+
+message TimeScore{
+  int64  tm    = 1;//in minute?
+  double score = 2;
+}
+message UserPubInfo{
+  int64     uid      = 1;
+  int64     mtm      = 2;
+  int32     switches = 3;
+  double    score    = 4;
+  TimeScore day      = 5;
+  TimeScore week     = 6;
+  TimeScore month    = 7;
+
+  string    region   = 8;//county, state, city
+}
+
+enum UserPubSwitches{
+  UPS_None           = 0;
+  UPS_NoScoreList    = 0x01; // 不上榜
+  UPS_SysNoScoreList = 0x010000; // system write 系统下榜
+}
+
+message UserPubInfoQuery{
+  int64 uid = 1;
+}
+message UserPubInfoQueryResponse{
+  UserPubInfo data = 3;
+}
+
+message UserPubSwitchesSetQuery{
+  int32  ons   = 2; //see UserPubSwitches
+  int32  offs  = 3; //see UserPubSwitches
+  double score = 4;//your current score
+}
+message UserPubSwitchesSetQueryResponse{
+  int32 switches = 3; //new switches? or zero if not set
+}
+
+message UserPubBasicInfoModifyQuery{
+  repeated string region = 8;//
+}
+message UserPubBasicInfoModifyQueryResponse{
+  int64 n = 2;//
+}
+
+message ScoreListInfo{
+  int64  uid   = 1;
+  double score = 3; //total score
+  double val   = 4;// the special score
+}
+enum PeriodTypes{
+  PeriodTypeNone   = 0x00;
+  PeriodTypeMinute = 0x01;
+  PeriodTypeHour   = 0x02;
+  PeriodTypeDay    = 0x03;
+  PeriodTypeWeek   = 0x04;
+  PeriodTypeMonth  = 0x05;
+  PeriodTypeYear   = 0x06;
+}
+message UserPubScoreListQuery{
+  PeriodTypes   pt    = 2;//
+  SkipCountDesc limit = 3; //skip count, normally, skip=0, count=1000,
+}
+message UserPubScoreListQueryResponse{
+  int64                  mtm  = 2; //last time
+  repeated ScoreListInfo data = 3;
+}
+
+message ScoreListMyRankQuery{
+  double score = 3; //hint
+}
+message ScoreListMyRankQueryResponse{
+  int32  rank  = 1;
+  int64  mtm   = 2; //last time
+  double score = 3;
+  double inf   = 4; //the 1000
+}
+//====================================================================
+//-------------------------------------------------------------------------
+enum UserBasicSetsFlags{
+  UBSF_None      = 0;
+  UBSF_Reserve   = 0x01;
+  UBSF_NameColor = 0x02;
+}
+message UserBasicSets{
+  int32   flags = 1;
+  fixed32 color = 2;//the name color in uint32
+}
+
+//====================================================================
+message UserSetsStruct{
+  int32  fontsz = 3; //font size
+  string bgimg  = 6; //background image
+}
+
+message UserPrivInfo{
+  int64 switches = 3; //see UserPasswordSwitches for more
+  bool  login    = 4; //has login
+  bool  destroy  = 6; //has destroy
+  bool  lock     = 7; //lock, if length < 1, has none
+  int64 setsi    = 8; //see UserPrivSetsFlags
+  bytes setss    = 9; //see UserSetsStruct
+}
+message UserPrivQuery{
+  bytes cA = 7; //if len(cA)>0,and switch of UserPasswordSwitches is available, do srp1
+}
+message UserPrivQueryResponse{
+  UserPrivInfo            info = 4;
+  repeated UserSrp1Result rs   = 8; //if UserPasswordsQuery.cA presented
+}
+
+message UserPrivSetQuery{
+  repeated int64          setsi = 8; //see UserPrivSetsFlags
+  repeated UserSetsStruct setss = 9; //see UserSetsStruct
+}
+message UserPrivSetQueryResponse{
+  int64 n = 2;
+}
+//set api, only when passwords is empty
+message UserPasswordsSetQuery{
+  UserPrivPasswordSwitches switch = 3;
+  SrpInfo                  srp    = 4;
+  bytes                    sign   = 1;
+  bool                     on = 2; //true 开启 false 关闭
+}
+message UserPasswordsSetQueryResponse{
+  int64 n = 2;
+}
+
+
+//====================================================================
+
+enum UserSearchByFlags{
+  USBF_None  = 0;
+  USBF_Xid   = 1;
+  USBF_Name  = 2;
+  USBF_Phone = 4;
+  USBF_Email = 8;
+  USBF_Label = 0x10;
+}
+message UserSearchQuery{
+  SkipCountDesc     limit = 2;
+  UserSearchByFlags flag  = 3; //see GroupSearchByFlags
+  string            txt   = 4; //if phone, with or with no [zone-]phone
+  Sign              sign  = 5;
+}
+
+message UserSearchInfo{
+  int64           uid    = 1 [jstype = JS_STRING];
+  string          xid    = 2;
+  string          name   = 3;
+  string          intro  = 4;
+  string          phone  = 5;//search by phone only with zone-phone format
+  repeated string labels = 7;
+}
+message UserSearchQueryResponse{
+  int64                   total    = 3;
+  repeated UserSearchInfo data     = 4;
+  int32                   captchaN = 5; //left search times
+}
+//====================================================================
+//====================================================================
+message UserHotLabelsQuery{
+  SkipCountDesc limit = 3; //maybe ignored
+}
+message UserHotLabelsQueryResponse{
+  repeated TextCount data = 4;
+}
+//====================================================================
+// phone/xid/email...
+enum AccountIdTypes{
+  AIT_None  = 0;
+  AIT_Xid   = 0x1; //
+  AIT_Phone = 0x2; //
+  AIT_Email = 0x4; //
+}
+message AccountIdInfo{
+  int64          uid    = 2;
+  int32          status = 3;
+  AccountIdTypes type   = 4;//
+  string         id     = 7; //email, phone, xid ...?
+}
+enum AccountIdStatus{
+  AIS_None       = 0;
+  AIS_NoLogin    = 0x1; //不允许此方式登录
+  AIS_NoFindable = 0x2; //不允许此方式查找
+  AIS_NoList     = 0x4; //不允许此方式列表查找
+}
+
+
+
+//获取对应状态
+message AccountIdStatusQuery{
+  int32  types = 3;//id类型，AccountIdTypes
+  string xid   = 4;
+  string email = 5;
+  string phone = 6;
+}
+message AccountIdStatusQueryResponse{
+  repeated AccountIdInfo infos = 4;//
+}
+
+//bit位操作状态
+message AccountIdStatusBitsOptQuery{
+  AccountIdTypes type = 1;//
+  int32          ons  = 2; //see AccountIdStatus
+  int32          offs = 3;//see AccountIdStatus
+  bytes          sign = 6;//the phone sign for
+}
+message AccountIdStatusBitsOptQueryResponse{
+  int64 n      = 2;
+  int32 status = 3;//see AccountIdStatus
+}
+//====================================================================
+//邀请码信息. 通过邀请码获取用户信息，及过期日期
+message InvitationCodeInfo{
+  int64  uid   = 2;
+  int64  ctm   = 3;
+  int64  mtm   = 4; //最后申请时间
+  // int64 flags = 5;
+  // int32 status = 6;
+  string code  = 7; //邀请码
+  bytes  uinfo = 9; //see UserInfo
+}
+
+//通过邀请码获取用户信息
+//服务端限流
+message InvitationCodeInfoQuery{
+  int32  flags = 2; // 位操作， 需要签名信息进行后期接口操作
+  string code  = 4;
+}
+message InvitionCodeInfoQueryResponse{
+  int64              expire = 3;//过期时间跨度,expire-delta in ms
+  InvitationCodeInfo code   = 4;//
+  bytes              sign   = 7;// InvitationCodeInfo的签名数据信息， 后续调用接口， 比如（注册或更新）
+}
+
+message InvitationUserCodeInfo{
+  int64  uid  = 2;
+  int64  mtm  = 4; //最后申请时间
+  string code = 7; //邀请码
+}
+
+//获取用户的邀请码， 扫码用户二维码。 二维码正常用户前期自动更新邀请码过期时间
+message InvitationUserCodeInfoQuery{
+  int64  uid    = 2;
+  bytes  qrcode = 7;//用户qrcode
+  string imei   = 8; //imei
+}
+message InvitationUserCodeInfoQueryResponse{
+  int64                  expire = 3;//过期时间跨度,expire-delta in ms
+  InvitationUserCodeInfo code   = 4;//
+  bytes                  sign   = 5; // InvitationCodeInfo的签名数据信息， 后续调用接口， 比如（注册或更新）
+}
+
+//延期邀请码申请
+message InvitationCodeRenewQuery{
+  UserInfo uinfo = 9;
+}
+//200 自动通过， 2xx 等待审核
+message InvitationCodeRenewQueryResponse{
+  // int32 status = 2;//
+  int64              expire = 3;//过期时间跨度,expire-delta in ms
+  InvitationCodeInfo code   = 4;//
+  bytes              sign   = 7;// InvitationCodeInfo的签名数据信息， 后续调用接口， 比如（注册或更新）
+}
+
+
+message UserInvitationListMyInviteesQuery{
+    int64 invitee = 2 [jstype=JS_STRING];
+    SkipCountDesc limit = 3;
+}
+message UserInvitationListMyInviteesQueryResponse{
+    repeated int64 invitees = 4;
+    int64 total = 5; //邀请人数量，只有第一次调用列表时返回
+}
+
+
+//====================================================================
+//新设备登录时返回
+enum UserNewDeviceLoginAuthTypes{
+  UNDLAT_None       = 0;
+  UNDLAT_Sfz        = 1; //身份证后4位
+  UNDLAT_InvCode    = 2;//邀请码
+  UNDLAT_OldDevCode = 3;//老设备随机码
+}
+message SignUserNewDeviceLogin{
+  int64                       tm    = 2;// old tm
+  int64                       ntm   = 3; //new tm
+  UserNewDeviceLoginAuthTypes authT = 4;//验证类型
+  UserInfo                    user  = 5;// some user info
+
+  string                      imei  = 7;
+  string                      sd    = 8;
+  string                      ip    = 9;
+  bool                        flags = 10;
+}
+message UserNewDeviceLoginInfo{
+  string sd       = 4;// server data
+  string nonce    = 5;//
+  string hashImei = 6; //md5("sd-imei-nonce").hex()
+  bytes  sign     = 7; // server sign, see SignUserNewDeviceLogin
+}
+//新设备登录，验证身份证后四位
+message UserNewDeviceLoginSFZCheckQuery{
+  string                 hashSfz = 6;//验证身份证后四位 md5("sd-sfz4-nonce").hex()
+  UserNewDeviceLoginInfo info    = 7;
+}
+
+message UserNewDeviceLoginSFZCheckQueryResponse{
+  bytes sign = 7; //SignUserNewDeviceLogin
+}
+
+//新设备登录，请求发送当前登录设备临时验证码
+message UserNewDeviceLoginCodeQuery{
+  UserNewDeviceLoginInfo info = 7;
+}
+message UserNewDeviceLoginCodeQueryResponse{
+  string key = 6;
+}
+message UserNewDeviceLoginCodeQueryEvent{
+  string code = 7;//
+}
+
+//新设备登录，邀请人的邀请码
+message UserNewDeviceLoginInvCodeQuery{
+  string                 invCode = 6;//邀请人的邀请码
+  UserNewDeviceLoginInfo info    = 7;
+}
+message UserNewDeviceLoginInvCodeQueryResponse{
+  bytes sign = 7;
+}
+//====================================================================

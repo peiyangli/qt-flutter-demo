@@ -1,0 +1,5 @@
+2436355  密码：1234567t 邀请码：QTRTHYJC
+2409531 密码：1234567t  邀请码：QTRTHYJC 71780517107835853
+
+
+flutter pub run msix:create

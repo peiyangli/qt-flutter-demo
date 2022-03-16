@@ -1,0 +1,85 @@
+/user/group/search	$1	#POST	GroupSearchQuery	
+/user/info/search	$1	#POST	UserSearchQuery	搜索用户信息
+/user/store/upload	$1	#POST	Upload	文件上传，参考蝙蝠
+/user/store/download	$1	#GET	DownloadSignQuery	文件下载，参考蝙蝠
+/user/stores/:bucket/:id	$1	#GET	DownloadSign	文件下载，参考蝙蝠
+/user/student/info/add	$1	#POST	AccountStudentInfoAddQuery	添加学籍
+/user/student/info/list	$1	#POST	AccountStudentInfoListQuery	获取学籍
+/user/school/student/info	$1	#POST	SchoolStudentInfoQuery	获取学籍签名
+/user/bubble/list	$1	#POST	BubbleListQuery	气泡列表
+/user/me/bubble/list	$1	#POST	BubbleMeListQuery	我的气泡列表
+/user/bubble/use	$1	#POST	BubbleUseQuery	使用气泡
+/user/bubble/using	$1	#POST	BubbleUsingQuery	正在使用的气泡
+/user/bubble/score/exchange	$1	#POST	BubbleScoreExchangeQuery	积分兑换气泡
+/user/bubble/sign	$1	#POST	SignBubbleInfoQuery	气泡签名
+/user/destroy	$1	#POST	UserDestroyQuery	账号注销
+/user/destroy/month	$1	#POST	UserDestroyMonthQuery	自动销毁设置、获取
+/user/phone/set	$1	#POST	UserSetPhoneQuery	设置手机号
+/user/register/device	$1	#POST	UserRegisterDeviceQuery	是否为注册设备
+/user/account/status/opt	$1	#POST	AccountIdStatusBitsOptQuery	账号登录、查找方式设置
+/user/account/status	$1	#POST	AccountIdStatusQuery	账号登录、查找方式状态
+/user/notice/list	$1	#POST	NoticeListQuery	公告列表
+/user/sticker/package/list	$1	#POST	StickerPackageListQuery	
+/user/protocol/query	$1	#POST	UserProtocolQuery	获取用户隐私协议版本信息
+/user/protocol/agree	$1	#POST	UserAgreeProtocolQuery	同意用户隐私协议
+/user/login/sfz/check	$1	#POST	UserNewDeviceLoginSFZCheckQuery?Login=true	新设备登录身份证验证
+/user/login/inv/check	$1	#POST	UserNewDeviceLoginInvCodeQuery?Login=true	新设备登录邀请码校验
+/user/group/search/opt	$1	#POST	GroupIdStatusBitOptQuery	群搜索设置
+/user/group/search/opt/info	$1	#POST	GroupIdStatusInfoQuery	群搜索设置信息
+/user/my/invitation/list	$1	#POST	UserInvitationListMyInviteesQuery	邀请人列表
+/user/group/recommend/list	$1	#POST	RecommendGroupListQuery	推荐群列表
+/user/pub/info	$1	#POST	UserPubInfoQuery_None	用户经验信息
+/user/pub/switches/set	$1	#POST	UserPubSwitchesSetQuery	积分经验上下榜设置
+/user/pub/UserPubBasicInfoModifyQuery	$1	#POST	UserPubBasicInfoModifyQuery	积分经验基本信息设置
+/user/continue/login	$1	#POST	ContinueLoginQuery	连续登录加经验
+/user/invitor/exp/list	$1	#POST	InvitorExpListQuery	邀新经验列表
+/user/news/list	$1	#POST	NewsInfosQuery	小助手列表
+/api/notice/msg	$0	#POST	NoticeMsgQuery	
+/api/school/review	$0	#POST	ReviewSchoolStudentQuery	
+/api/sfz/review	$0	#POST	UserSfzReviewQuery	
+/api/xid/change	$0	#POST	XidChangeQuery	
+/api/msg/notice	$0	#POST	IiMsgToQuery	
+/v2/guest/sys/DomainZoneQuery	$0	#POST	DomainZoneQuery	获取节点区域信息
+/v2/guest/sys/DomainZoneV1Query	$0	#POST	DomainZoneV1Query	加密获取节点区域信息
+/v2/guest/sys/SysImHostsQuery	$0	#GET	SysImHostsQuery	系统相关信息
+/v2/guest/sys/SysEchoQuery	$0	#POST	SysEchoQuery	系统相关信息
+/v2/guest/sys/SysTimeQuery	$0	#POST	SysTimeQuery	系统相关信息
+/v2/guest/user/UserHostQuery	$0	#POST	UserHostQuery	
+/v2/guest/user/DefaultUserBasicInfoSignForTokenQuery	$0	#POST	DefaultUserBasicInfoSignForTokenQuery	
+/v2/guest/qt/AccountSignUpQuery	$0	#POST	AccountSignUpQuery	注册
+/v2/guest/auth/mob/PhoneAuthSendCodeQuery	$0	#POST	PhoneAuthSendCodeQuery	认证MOB相关
+/v2/guest/auth/mob/PhoneAuthCheckCodeQuery	$0	#POST	PhoneAuthCheckCodeQuery	认证MOB相关
+/v2/guest/auth/mob/PhoneAuthMobQuickCheckQuery	$0	#POST	PhoneAuthMobQuickCheckQuery	认证MOB相关
+/v2/guest/auth/captcha/CaptchaQuery	$0	#POST	CaptchaQuery	图片验证
+/v2/guest/user/v2/UserSrp1Query	$0	#POST	UserSrp1Query	
+/v2/guest/version/upgrade/check	$0	#POST	VersionCheckQuery	版本升级检测
+/v2/guest/sys/config	$0	#POST	SysConfigQuery	配置相关
+/v2/guest/invitation/info	$0	#POST	InvitationCodeInfoQuery	通过邀请码获取用户信息
+/v2/guest/store/upload	$0	#POST	Upload	文件上传，参考蝙蝠
+/v2/guest/store/download	$0	#GET	DownloadSignQuery	文件下载，参考蝙蝠
+/v2/guest/stores/:bucket/:id	$0	#GET	DownloadSign	文件下载，参考蝙蝠
+/v2/guest/login/sfz/check	$0	#POST	UserNewDeviceLoginSFZCheckQuery	新设备登录身份证验证
+/v2/guest/login/inv/check	$0	#POST	UserNewDeviceLoginInvCodeQuery	新设备登录邀请码校验
+/v2/user/sys/SysImHostsQuery	$1	#POST	SysImHostsQuery	
+/v2/user/sys/SysEchoQuery	$1	#POST	SysEchoQuery	
+/v2/user/sys/SysTimeQuery	$1	#POST	SysTimeQuery	
+/v2/user/imex/apns/UserApnsSetTokenQuery	$1	#POST	UserApnsSetTokenQuery	推送相关
+/v2/user/imex/apns/UserApnsInfoAllV2Query	$1	#POST	UserApnsInfoAllV2Query	推送相关
+/v2/user/imex/apns/UserApnsInfoOneQuery	$1	#POST	UserApnsInfoOneQuery	推送相关
+/v2/user/imex/apns/UserApnsSetQuietQuery	$1	#POST	UserApnsSetQuietQuery	推送相关
+/v2/user/imex/user/UserOnlineInfosQuery	$1	#POST	UserOnlineInfosQuery	在线状态
+/v2/user/imex/hc/HCCreateQuery	$1	#POST	HCCreateQuery	盖楼相关
+/v2/user/imex/hc/HCPostQuery	$1	#POST	HCPostQuery	盖楼相关
+/v2/user/imex/hc/HCListQuery	$1	#POST	HCListQuery	盖楼相关
+/v2/user/auth/mob/PhoneAuthCheckCodeQuery	$1	#POST	PhoneAuthCheckCodeQuery	认证MOB相关
+/v2/user/auth/mob/PhoneAuthMobQuickCheckQuery	$1	#POST	PhoneAuthMobQuickCheckQuery	认证MOB相关
+/v2/user/invitation/user/info	$1	#POST	InvitationUserCodeInfoQuery	获取用户的邀请码
+/v2/user/invitation/renew	$1	#POST	InvitationCodeRenewQuery	延期邀请码申请
+/v2/guest/qt/AccountAddressBookMatchQuery	$1	#POST	AccountAddressBookMatchQuery	联系人列表
+/v2/guest/qt/AccountAddStudentInfoQuery	$1	#POST	AccountAddStudentInfoQuery	认证相关
+/v2/guest/qt/AccountStudentInfoListQuery	$1	#POST	AccountStudentInfoListQuery	认证相关
+/v2/guest/qt/AccountAddSfzQuery	$1	#POST	AccountAddSfzQuery	认证相关
+/v2/guest/qt/AccountGetImmutableQuery	$1	#POST	AccountGetImmutableQuery	认证相关
+/auth/token	$0	#POST	DefaultUserBasicInfoSignForTokenQuery	
+/user/group/xid	$0	#POST	GroupXidCreateQuery	
+/user/inner/group/create	$0	#POST	GroupInnerCreateQuery	

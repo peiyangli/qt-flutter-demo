@@ -1,0 +1,27 @@
+syntax = "proto3";
+package pb;
+
+option go_package = "./pb;pb";
+option java_package = "com.woyue.im";
+option java_outer_classname = "PbLocal";
+
+
+import "types.proto";
+
+message GDLatestLogin{
+    int64 uid = 1;
+
+    string host= 4;
+    string token = 5;
+}
+
+
+message GDImeiInfo{
+    string rd = 1;
+}
+
+message DBHttpToken{
+    int64 uid = 1;
+    int64 expire = 2;
+    string token = 3;
+}

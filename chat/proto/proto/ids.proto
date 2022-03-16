@@ -1,0 +1,358 @@
+syntax = "proto3";
+package pb;
+
+option go_package = "./pb;pb";
+option java_package = "com.woyue.im";
+option java_outer_classname = "PbIds";
+// option objc_class_prefix = "V2_";
+
+
+/*
+请求接口的ID编号
+*/
+enum Fids{
+  Fids_None                               = 0x0000;
+  //system queries
+  Fids_SysPingQuery                       = 0x0001; // ping服务器，会返回 [SysPingQuery](sys.proto.md#SysPingQuery)
+  Fids_SysHeartBeatQuery                  = 0x0002; // 心跳请求，服务器可能不返回
+  Fids_SysEchoQuery                       = 0x0010; // echo请求，原样返回
+  Fids_SysTimeQuery                       = 0x0011; // 获取服务器时间
+  Fids_SysTestNPackage                    = 0x0017; // ~~这是一个测试请求~~
+
+  Fids_SysGatewaysQuery                   = 0x0020; // ~~获取网关配置~~
+
+  //-----------------------------------------version 1
+  Fids_v2_UserLoginQuery                  = 0x030; // 用户登录请求
+  Fids_v2_MsgMessageToQuery               = 0x031; // 消息发送请求
+  Fids_v2_MsgOfflineQuery                 = 0x032; // 拉取离线消息请求
+  Fids_v2_MsgGroupMsgCountQuery           = 0x033; // 获取大群的离线个数以及最近的消息
+  Fids_v2_MsgStatusReceiptQuery           = 0x034; // 消息已收标记
+  Fids_v2_MsgReadStatusQuery              = 0x035; // 消息已读
+
+
+  Fids_UserNewDeviceLoginCodeQuery        = 0x040; //发送验证码
+
+  //-----------------------------------------
+
+  Fids_UserSignOutQuery                   = 0x0131; // 用户登出
+  Fids_UserKickOutWebQuery                = 0x0132; // 把桌面或者web端踢下线
+
+  //-----------------------------------------
+
+  //login queries                  = 0x0100; //from
+  Fids_UserLoginQuery                     = 0x0101; // 用户登录请求
+  Fids_UserBasicInfoSignQuery             = 0x0103; // 用户基本信息签名请求。其他部分接口需要签名了的用户信息
+  Fids_UserBasicInfoThirdSignQuery        = 0x0104; // 用户信息签名请求。其他部分接口需要签名了的用户信息
+
+  Fids_UserWSQrCodeLoginQuery             = 0x0105; // 桌面端和web端扫码登录
+  Fids_UserWSQrCodeReconnectedQuery       = 0x0106; // 桌面端和web端扫码登录， 断开重连后需要调用，不然老的二维码失效
+  Fids_UserWSQrCodeAllowLoginQuery        = 0x0107; // 允许桌面端和web端扫码登录
+
+  Fids_UserGroupRoleSignQuery             = 0x0108; //  用户在某个群里角色信息的签名
+
+
+  Fids_UserPrivQuery                      = 0x0109; // 用户密码信息请求
+  Fids_UserPrivSetQuery                   = 0x010a; // 用户密码开关设置请求
+  Fids_UserPasswordsSetQuery              = 0x010b; // 用户密码设置请求
+
+  Fids_UserOnlineInfoQuery                = 0x0111; // 获取用户在线信息， 如上线时间，设备等
+
+  Fids_UserPhoneCheckOKQuery              = 0x019f; // 电话验证通过，每隔一段时间间隔会需要用户进行电话验证
+
+  Fids_MsgUserCustomerServiceOfflineQuery = 0x0220; // `客服`接口，获取客服聊天记录
+  Fids_MsgUserCustomerServiceMapQuery     = 0x0221; // `客服`接口，获取当前用户分配的客服
+
+
+  //cs basic
+  Fids_UserUpdateCustomerServiceQuery     = 0x0120; //`客服`接口，客服工作状态切换
+  Fids_UserCustomerServiceDoneQuery       = 0x0121; //`客服`接口，完成与某人的聊天
+  Fids_UserCustomerServiceHelpQuery       = 0x0122; // ~~客服帮助~~
+
+  Fids_UserBasicInfoModifyQuery           = 0x125; // 修改用户基本信息
+  Fids_UserSetSwitchesQuery               = 0x126; // 修改用户的switches字段，标志位
+  Fids_UserDestroyQuery                   = 0x127; // 账号销毁
+  Fids_UserSetPhoneQuery                  = 0x128; // 设置电话
+
+  Fids_SchoolVisibleSetQuery              = 0x12a; // 设置学籍信息可见权限
+
+
+  Fids_FriendFlagsBitOptQuery             = 0x0150; // 好友标志位设置
+  Fids_BanUserGroupQuery                  = 0x0151; //
+  Fids_UnBanUserGroupQuery                = 0x0152; //
+
+  Fids_MsgMessageToQuery                  = 0x0201; //
+  Fids_MsgStatusReceiptQuery              = 0x0202; //
+  Fids_MsgOfflineQuery                    = 0x0203; //
+  Fids_MsgReadStatusQuery                 = 0x0204; //
+  Fids_MsgBilateralRecallQuery            = 0x0205; //
+  Fids_MsgSetAutoReplyQuery               = 0x0206; //
+  Fids_MsgGetAutoReplyQuery               = 0x0207; //
+  Fids_MsgGroupMsgCountQuery              = 0x0211;//group msg count
+
+  //group queries
+  Fids_GroupDismissQuery                  = 0x0304; //
+
+  Fids_GroupCreateQuery                   = 0x0380; //
+  Fids_GroupAdminSilentGroupQuery         = 0x0381; //
+  Fids_GroupAdminSetIFlagsOnOffQuery      = 0x0382; //
+  Fids_GroupModifyInfoQuery               = 0x0383; //
+  Fids_GroupUpgradeCapacityQuery          = 0x0384; //
+  Fids_GroupConvertMiniToNormalQuery      = 0x0385; //
+  Fids_GroupLocationApplyQuery            = 0x0386; //
+  Fids_GroupLocationModifyQuery           = 0x0387; //
+  Fids_GroupJoinQuery                     = 0x0388; //
+  Fids_GroupJoinApplyReviewQuery          = 0x0389; //
+  Fids_GroupRootTransferQuery             = 0x0235; //
+  Fids_GroupMemberLeaveQuery              = 0x0236; //
+
+  Fids_GroupNBLoginQuery                  = 0x0390; //
+  Fids_GroupNBCreateQuery                 = 0x0391; //
+  Fids_GroupNBJoinQuery                   = 0x0392; //
+  Fids_GroupNBLeaveQuery                  = 0x0393; //
+  Fids_GroupNBMembersListQuery            = 0x0394; //
+  Fids_GroupNBListQuery                   = 0x0395; //
+  Fids_GroupNBTakeOwnerQuery              = 0x0396; //
+  Fids_GroupNBHandoverOwnerQuery          = 0x0397; //
+  Fids_GroupNBKickoutQuery                = 0x0398; //
+  Fids_GroupNBCreateImGroupQuery          = 0x0399; //
+  Fids_GroupNBListMessageQuery            = 0x039a; //
+  Fids_GroupNBSetInfoQuery                = 0x039b; //
+  Fids_GroupNBSetAdminQuery               = 0x039c; //
+  Fids_GroupNBRoleListQuery               = 0x039d; //
+  Fids_GroupNBCloseGroupQuery             = 0x039e; //
+  Fids_GroupNBBlackListOptQuery           = 0x039f; //
+  Fids_GroupNBMsgBilateralRecallQuery     = 0x03a0; //
+
+
+  Fids_MsgDRMsgKeysUpdateQuery            = 0x0231; //
+  Fids_MsgDRMsgKeysGetQuery               = 0x0232; //
+  Fids_MsgDRPreKeyCreateQuery             = 0x0233; //
+  Fids_MsgDRPreKeyGetQuery                = 0x0234; //
+
+
+  Fids_MsgVoipAckQuery                    = 0x0400; //
+  Fids_MsgVoipQuery                       = 0x0401; //
+  Fids_MsgVoipAcceptQuery                 = 0x0402; //
+  Fids_MsgVoipUpdateSdpQuery              = 0x0403; //
+  Fids_MsgVoipCancelCallQuery             = 0x0404; //
+  Fids_MsgVoipUpdateSetsQuery             = 0x0405; //
+
+
+  //for qe
+  Fids_UserSignUpQuery                    = 0x0181; //
+
+  //friend.qe
+  Fids_FriendApplyQuery                   = 0x0580; //
+  Fids_FriendAddQuery                     = 0x0581; //
+  Fids_FriendInfoSetQuery                 = 0x0582; //
+  Fids_FriendModifyInfoStatusQuery        = 0x0583; //
+  Fids_FriendApplyListClearQuery          = 0x0585; //
+
+  //nsfw.qe
+  Fids_UploadFileInfo                     = 0x0586; //
+
+  //face.qe
+  Fids_UploadFileFaceQuery                = 0x0587; //
+  //qt.login
+  Fids_ContinueLoginQuery                 = 0x0588; //
+
+  Fids_Qtzc_PostAddQuery                  = 0x1001;// 成功在青藤之窗发布一条主贴
+  Fids_Qtzc_CommentAddQuery               = 0x1002;// 成功在青藤之窗发布一条评论
+  Fids_Qtzc_PostLikeQuery                 = 0x1003;// 在青藤之窗发布的主贴获得点赞
+  Fids_Qtzc_CommentLikeQuery              = 0x1004;// 在青藤之窗发布的评论获得点赞
+  Fids_Qtzc_FollowQuery                   = 0x1005;// 关注某人
+  Fids_Qtzc_PostPermissionUpdateQuery     = 0x1006;// 更改主贴权限
+
+  Fids_Qt_AddArchive                      = 0x1010;// 首次添加个人档案节点 +10 此经验值仅计入用户总经验值，不计入当日获取经验值
+  Fids_Qt_AddVote                         = 0x1011;// 新功能投稿被采纳 +30 此经验值仅计入用户总经验值，不计入当日获取经验值
+  Fids_Qt_UploadPicture                   = 0x1012;// 首次上传照片墙照片 +15 此经验值仅计入用户总经验值，不计入当日获取经验值
+  Fids_Qt_SwapXidRewards                  = 0x1013;// 兑换靓号
+  Fids_Qt_SwapRewards                     = 0x1014;// 兑换实物
+  Fids_Qt_InvitedReviewDoneQuery          = 0x1015;// 被邀请人完成学籍审核、身份证审核
+  Fids_Qt_InvitedActivateQuery            = 0x1016;// 被邀请人每日活跃
+
+  Fids_ReviewSchoolStudentQuery           = 0x1108;// 学籍审核
+  Fids_UserSfzReviewQuery                 = 0x1109;// 身份证审核
+}
+
+/*
+服务端通过长连接发送的事件ID
+*/
+enum EqFids{
+  EF_EqNone                             = 0x0000; //
+
+  EF_EqUserLoginQuery                   = 0x0101; // 多端登录事件
+
+  EF_EqUserWSQrCodeAllowLoginQueryEvent = 0x0102; // 桌面端或者web端登录请求事件
+  EF_EqUserRedirectionEvent             = 0x0104; // 网关切换事件。用于服务器动态修改网关配置。
+
+  EF_EqMsgMessageToEvent                = 0x0201; // 消息事件
+
+
+  EF_EqIiAdminKickoutQuery              = 0x0501; // 踢出事件，不能再进行登录
+
+  //    EqMsgStatusReceiptEvent     = 0x0202;
+
+  //    EqMsgVoipEvent              = 0x0400;
+}
+
+/*
+通过[EF_EqMsgMessageToEvent](#EqFids)发送的可持久化的事件
+mm=MIs，mc=对应的结构
+*/
+enum MIs{
+  MI_NoneEvent                          = 0;
+
+  MI_UserNewDeviceLoginCodeQueryEvent   = 0x0091;
+
+  MI_UserSignOutQueryEvent              = 0x0131;
+  MI_UserKickOutWebQueryEvent           = 0x0132;
+
+  MI_MsgMessageToQueryEvent             = 0x0201;
+  MI_MsgStatusReceiptQueryEvent         = 0x0202;
+
+  MI_MsgBilateralRecallQueryEvent       = 0x0205;
+
+  MI_MsgVoipAckEvent                    = 0x0400;
+  MI_MsgMsgVoipEvent                    = 0x0401;
+  MI_MsgVoipAcceptEvent                 = 0x0402;
+  MI_MsgVoipUpdateSdpEvent              = 0x0403;
+  MI_MsgVoipCancelCallEvent             = 0x0404;
+  MI_MsgVoipUpdateSetsQueryEvent        = 0x0405;
+
+  MI_GroupDismissQueryEvent             = 0x0304;
+  MI_GroupCreateQueryEvent              = 0x0501; //GroupCreateQueryEvent
+  MI_GroupMemberLeaveQueryEvent         = 0x0502; //GroupMemberLeaveQueryEvent
+  MI_GroupJoinApplyQueryEvent           = 0x0503;
+  MI_GroupJoinApplyReviewQueryEvent     = 0x0504;
+  MI_GroupJoinQueryEvent                = 0x0505;
+  MI_GroupUpgradeCapacityQueryEvent     = 0x0506;
+  MI_GroupRootTransferQueryEvent        = 0x0507;
+  MI_GroupAddAdminQueryEvent            = 0x0508;
+  MI_GroupRemoveAdminQueryEvent         = 0x0509;
+  MI_GroupAdminSilentGroupQueryEvent    = 0x050a;
+  MI_GroupAdminSilentUserQueryEvent     = 0x050b;
+  MI_GroupLocationApplyQueryEvent       = 0x050c;
+  MI_GroupLocationModifyQueryEvent      = 0x050d;
+  MI_GroupLocationApplyReviewQueryEvent = 0x050e;
+  MI_GroupModifyInfoQueryEvent          = 0x050f;
+  MI_GroupAdminSetIFlagsOnOffQueryEvent = 0x0510;
+  MI_GroupModifyMemberNameQueryEvent    = 0x0511;
+  MI_GroupJoinProblemQueryEvent         = 0x0512;
+  //    GroupAdminAnonymousQueryEvent        = 0x0512;
+  MI_IiAdminGroupDisableEvent           = 0x0580; //admin event
+
+  MI_FriendApplyQueryEvent              = 0x0601;
+  MI_FriendAddQueryEvent                = 0x0602;
+
+  MI_FriendInfoSetQueryEvent            = 0x0606;
+
+  //say hi
+  MI_MomentCallQueryEvent               = 0x0701;
+  MI_DriftBottleQueryEvent              = 0x0702;
+  MI_MomentNoticeQueryEvent             = 0x0703;
+  MI_SayHiQueryEvent                    = 0x0704;
+  MI_FriendFlagsBitOptQueryEvent        = 0x0705;
+  //user defined events here
+  //    UDEventBegin = 0x8000;
+  MI_UDInputEvent                       = 0x8001;
+  MI_UDScreenShotEvent                  = 0x8002;
+  MI_UDBurnMsgReadEvent                 = 0x8003;
+  MI_UDMsgVoipCalledEvent               = 0x8004;
+  MI_UDCouponReceived                   = 0x8005;
+  MI_UDGroupEvent                       = 0x8006;
+  MI_UDMsgForword                       = 0x8007;
+  MI_UDMsgBiRecallA                     = 0x8008;
+  MI_UDMsgBiRecallB                     = 0x8009;
+  MI_UDMsgBiRecallRefuse                = 0x800a;
+  MI_IiAdminKickoutQuery                = 0x800b;
+}
+
+
+
+/*
+对应签名结构，参见[Sign](sign.proto.md#Sign)
+*/
+enum SignTypes{
+  ST_NoneSign                         = 0;
+  ST_TempTokenSign                    = 0x01;
+  ST_UserPhoneCheckQuerySign          = 0x10;
+  ST_UserAuthInfoSign                 = 0x11; //user login
+  ST_UserWSQrCodeLoginQrCode          = 0x12;
+  ST_AdminRealmAuthInfoSign           = 0x20;// admin info
+
+  ST_FriendAddInfoSign                = 0x100;
+
+  //    MomentCallQuerySign = 0x20;
+  ST_ImgCodeValidateSign              = 0x101;
+  ST_UserEmailValidateSign            = 0x102;
+  ST_UserSecurityQuestionValidateSign = 0x103;
+  ST_UserSmsValidateSign              = 0x104;
+  ST_SignatureUserSrp2                = 0x105;
+  ST_UserBasicInfoSign                = 0x108;
+
+  ST_UserVipInfoSign                  = 0x109;
+
+  ST_UserGroupRoleSign                = 0x10a;
+
+  ST_QrCodeUrlInfo                    = 0x110;
+  ST_GroupNBGatewaySignData           = 0x111;
+
+  ST_SignPhoneAuth                    = 0x114;
+  ST_SignCaptchaInfo                  = 0x115;
+  ST_SignEmailAuth                    = 0x116;
+  ST_SignSchoolVisibleSet             = 0x117;
+  ST_SignPasswordAuth                 = 0x118;
+  ST_SignInvitationInfo               = 0x119;
+  ST_SignFriendInfo                   = 0x11A;
+  ST_MsgMetaBubbleSignInfo            = 0x11B;
+
+  ST_SignUserNewDeviceLogin           = 0x131;
+}
+
+
+/*
+二维码类型
+*/
+enum QrCodeTypes{
+  QCT_NoneQrCode              = 0;
+
+  QCT_UserQrCode              = 1; //http
+  QCT_GroupQrCode             = 2; //http
+
+  QCT_UserWSQrCodeLoginQrCode = 0x10; //tcp-websocket
+}
+
+
+/*
+客户端平台，同一平台同时只允许一个链接实例
+*/
+enum Platforms{
+  P_None    = 0x00;
+  P_Mobile  = 0x01;
+  P_Desktop = 0x02;
+}
+
+/*
+客户端操作系统类型。`&0x10>>4`为[Platforms](#Platforms)
+*/
+enum OSs{
+  OS_NONE    = 0x00;
+  OS_IOS     = 0x11;
+  OS_ANDROID = 0x12;
+  OS_WEB     = 0x21;
+  OS_DESKTOP = 0x22;
+}
+
+/*
+服务器发送消息时，预留的ID
+*/
+enum Sids{
+  SidNone            = 0;
+  SidSystem          = 1;
+  SidNotice          = 2;
+  SidBroadcast       = 0x0f;
+  SidCustomerService = 0xC8;
+  SidGroup           = 0x10;
+  SidFriend          = 0x20;
+}

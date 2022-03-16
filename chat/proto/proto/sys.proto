@@ -1,0 +1,100 @@
+syntax = "proto3";
+package pb;
+
+option go_package = "./pb;pb";
+option java_package = "com.woyue.im";
+option java_outer_classname = "PbSys";
+// option objc_class_prefix = "V2_";
+
+import "types.proto";
+
+message SysEmptyQuery{}
+
+message SysPingQuery{}
+message SysPingQueryResponse{}
+
+message SysEchoQuery{ string word = 1; }
+message SysEchoQueryResponse{ string word = 1; }
+
+message SysHeartBeatQuery{}
+message SysHeartBeatQueryResponse{}
+
+enum SysTimeTypes{
+  STT_Second = 0;
+  STT_MilliSecond = 1;
+  STT_MicroSecond = 2;
+  STT_NanoSecond = 3;
+}
+message SysTimeQuery{SysTimeTypes tt = 1;}
+message SysTimeQueryResponse{int64 v = 1;}
+
+
+message SysCheckAccountQuery{
+  IdName account = 1;
+}
+message SysCheckAccountQueryResponse{
+  bool has = 1;
+}
+
+message EqIiAdminKickoutQuery{
+  int64 disable = 4; //disable util this time, max.int64: destroy, max.int64 - 1: disable forever
+  string msg = 5;//why
+}
+
+message SysImHostsQuery{
+
+}
+message SysAddrInfo{
+  int32 port = 1;
+  string addr = 2;
+}
+enum SysHostTypes{
+  SHT_None = 0;
+  SHT_IMGateway = 1;
+  SHT_Domain = 2;
+}
+message SysHostInfo{
+  string name = 2;
+  repeated SysAddrInfo addrs = 4;//
+}
+message SysImHostsQueryResponse{
+  bool proxy = 1; //
+  string iso2 = 2; // if China="CN"
+  repeated SysHostInfo hosts = 4;
+}
+
+message IDBussinessOpenIDInfo{
+  int64 bid = 1; // bussiness-id
+  int64 btm = 2;//  bussiness tm
+  int64 uid = 4;//  user-id
+}
+
+
+
+//labels.json, xchuxid.json, xchgxid.json
+message SysConfigQuery{
+  repeated string names = 2; //config names
+  int64 mtm = 3; //>mtm
+}
+//CREATE TABLE "public"."im_config" (
+//"name" varchar(127) COLLATE "pg_catalog"."default" NOT NULL,
+//"ctm" int8 NOT NULL,
+//"mtm" int8 NOT NULL,
+//"status" int4 NOT NULL,
+//"cs" text COLLATE "pg_catalog"."default",
+//"cb" bytea,
+//CONSTRAINT "im_config_pkey" PRIMARY KEY ("name")
+//)
+//;
+message SysConfig{
+  int64 ctm = 2;
+  int64 mtm = 3;
+  int64 status = 4;
+  string name = 5;
+  string cs = 6; //content string
+  bytes cb = 7; //content bytes
+}
+
+message SysConfigQueryResponse{
+  repeated SysConfig data = 3;
+}

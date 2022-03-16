@@ -1,0 +1,404 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "./pb;pb";
+option java_package = "com.woyue.im";
+option java_outer_classname = "PbAuth";
+// option objc_class_prefix = "V2_";
+
+
+import "sign.proto";
+import "types.proto";
+//--------------------------------------------------------------------------------------
+message UserThirdAuthQuery{
+  int64 cid = 2; // commercial-id
+  int64 kv = 3; //the query-sign key version, use to load from cache or from db
+  Sign query = 4; //verify and decode
+}
+
+message UserThirdAuthQueryResponse{
+  int64 kv = 3;
+  Sign response = 4; //verify and decode
+}
+
+message UserThirdAuthQuerySign{
+  int64 test = 1;
+}
+message UserThirdAuthResponseSign{
+}
+
+//--------------------------------------------------------------------------------------
+enum SignPhoneAuthFlags{
+  SPAF_None = 0;
+  SPAF_Certified = 1;
+}
+message SignPhoneAuth {
+  int32 flags = 1;// SignPhoneAuthFlags
+  PhoneCodeUsages usage = 2; //must
+  PhoneAuthCodeTypes act = 3;//
+  string phone = 4; //must
+  int64 uidPhone = 5 [jstype=JS_STRING]; //optional
+
+  int64 tm = 8; //must
+  string randStr = 9; //must
+  int64 uid = 10 [jstype=JS_STRING]; //optional
+  string ip = 11;
+  string imei = 12;//
+  bytes any = 13;
+  int32 status = 14; //user phone status
+}
+message SignEmailAuth {
+  int32 flags = 1;// SignPhoneAuthFlags
+  PhoneCodeUsages usage = 2; //must
+  PhoneAuthCodeTypes act = 3;//
+  string email = 4; //must
+  int64 tm = 5; //must
+  string randStr = 6; //must
+  int64 uid = 7 [jstype=JS_STRING]; //optional
+  string ip = 8;
+  string imei = 9;//
+  bytes any = 10;
+}
+enum PhoneAuthCodeTypes{
+  PACT_None = 0; //
+  PACT_LocalMob = 1; //local mob
+  PACT_QuickMob = 2; //quick mob
+  PACT_Server = 3; //server send
+}
+enum PhoneCodeUsages{
+  PCU_None = 0;
+  PCU_Signup = 1; //注册
+  PCU_Signin = 2; //登录
+  PCU_Verify = 3; //加强认证
+}
+message PhoneAuthSendCodeQuery{
+  PhoneCodeUsages usage = 2;//
+  string phone = 3;//phone number, +86-X, or X, default to +86
+  string ud = 4;//user data
+}
+message PhoneAuthSendCodeQueryResponse{
+  int32 status = 1;// status = 0-> ok, 302 -> local send, PASCT_Mob
+  PhoneAuthCodeTypes t = 2;//code type, if 302, need client to support MOB or ....
+  string sd = 3;//server-side data, futher auth use
+  bool serverSend = 4; //true server send code
+}
+
+message PhoneAuthCheckCodeQuery{
+  string code = 2;// the code you received
+  PhoneCodeUsages usage = 4;//
+  string phone = 5;//phone number, +86-X, or X, default to +86
+  string ud = 6;//user data
+  string imei = 7;// id/imei
+  PhoneAuthCodeTypes t = 8;//code type, if 302, need client to support MOB or ....
+  string sd = 9;//server-side data, futher auth use
+}
+enum PhoneAuthCheckFlags{
+  PACF_None = 0;
+  PACF_AccountNotfound = 0x1;
+  PACF_PhoneDelProtectPeriod = 0x2; //注销保护期间
+}
+message PhoneAuthCheckCodeQueryResponse{
+  int32 flags = 2;// 按位或 bit or PhoneAuthCheckFlags
+  UserNode gw = 6;// 所属节点
+  bytes sign = 7;// SignPhoneAuth
+  string sd = 9;//server-side data, futher auth use
+}
+
+message PhoneAuthMobQuickCheckQuery{
+  PhoneCodeUsages usage = 2;//
+  string phoneMsked = 3;//phone number, +86-X, or X, default to +86
+  string ud = 4;//user data
+  string imei = 7;// id/imei
+  string token = 8;//
+  string opToken = 9;//
+  string operator = 10;//
+  string md5 = 11;//
+}
+
+message PhoneAuthMobQuickCheckQueryResponse{
+  int32 flags = 2;// 按位或 bit or PhoneAuthCheckFlags
+  UserNode gw = 6;// 所属节点
+  bytes sign = 7;// SignPhoneAuth
+  string sd = 9;//server-side data, futher auth use
+}
+//--------------------------------------------------------------------------------------
+//--------
+enum CaptchaTypes {
+  CT_None = 0x00;
+  CT_SlideImage = 0x01; // 滑动图片
+  CT_BlockImage = 0x02; // 拼图图片
+  CT_RotateImage = 0x03; // 旋转图片
+}
+
+message CaptchaBlockImage {
+  repeated bytes imgs = 4; // 二维二进制图片数据
+}
+message CaptchaBlockImageAnswer {
+  string answer = 3;
+}
+message CaptchaSlideImage {
+  int64 offsetY = 3; // 滑块y轴偏移坐标值
+  bytes bkgImg = 4; // 背景图
+  bytes cutoutImg = 5;  // 拼图滑块
+}
+message CaptchaSlideImageAnswer {
+  int64 delta = 2; //
+  int64 answer = 3; //
+}
+message CaptchaRotateImage {
+  bytes img = 4; // 旋转图块
+}
+message CaptchaRotateImageAnswer {
+  int64 delta = 2; //
+  int64 answer = 3; //
+}
+message CaptchaData{
+  CaptchaTypes ct = 3;  // 服务器返回的验证类型
+  CaptchaBlockImage block = 5;//
+  CaptchaSlideImage slide = 6;//
+  CaptchaRotateImage rotate = 7;//
+}
+
+message CaptchaDataAnswer{
+  CaptchaTypes ct = 3;  // 服务器返回的验证类型
+  CaptchaBlockImageAnswer block = 5;//
+  CaptchaSlideImageAnswer slide = 6;//
+  CaptchaRotateImageAnswer rotate = 7;//
+}
+
+message CaptchaDataAnswerSign{
+  CaptchaDataAnswer answer = 4;
+  pb.Sign sign = 7;//sign data, client can check this value with public key
+}
+//--------
+
+enum CaptchaDataTypes{
+  CDT_Bytes = 0;
+  CDT_String = 1; //base64, json
+}
+message CaptchaUserData{
+  int64 uid = 2; // 用户id
+  int64 gid = 3;
+  string phone = 4; //with zone, default to +86-
+  string email = 5; // email
+  string imei = 8; //
+}
+message CaptchaQuery{
+  CaptchaUserData ud = 6;//
+  CaptchaDataTypes dt = 7; // 图片验证码的返回类型, 0: 二进制, 1: base64, json
+  CaptchaDataAnswerSign answer = 10;//答案 加上上次的数据集合
+}
+message CaptchaQueryResponse{
+  int32 status = 1;//if 200, answer is OK
+  CaptchaData data = 4; //图片, or json
+  pb.Sign sign = 7;//sign data, client can check this value with public key
+}
+message SignCaptchaInfo{
+  int64 tm = 1;
+  int64 uid = 2;//
+  string ip = 3;//
+  CaptchaDataAnswer answer = 4;// 答案?
+  CaptchaUserData ud = 6;// the user info data
+}
+
+//--------------------------------------------------------------------------------------
+
+// 图片验证码获取
+message ImgCodeQuery {
+  int32 zone = 1;
+  string phone = 2;
+  int64 uid = 3; // 用户id
+}
+
+message ImgCodeQueryResponse {
+  int32 code = 1; // 400：电话格式错误
+  string imgCode = 2;
+  string key = 3;
+  string msg = 4;
+}
+
+// 图片验证码校验
+message SignatureGenerateValidationQuery {
+  int32 zone = 1;
+  string phone = 2;
+  string key = 6;
+  string imgCode = 3;
+  SingTypes signType = 4; // 客户端需要的签名类型, 响应则返回对应的类型(对应SingTypes)
+  int64 uid = 5;
+  string email = 7;
+}
+
+message SignatureGenerateValidationQueryResponse {
+  int32 code = 1; // 400：电话格式错误，305： 图片验证码过期，304： 图片验证码错误
+  string msg = 2;
+  string signatureStr = 3; // 字符串签名
+  bytes signatureByte = 4; // byte签名
+  Sign signatureSign = 5; // sing结构体对象签名
+  string key = 6; // 验证码错误的时候返回
+  string imgCode = 7; // 验证码错误的时候返回
+}
+
+message SignCaptha {
+  string phone = 1; // 电话
+  string email = 6; // email
+  int64 uid = 2;
+  string ip = 3;
+  int64 tm = 4;
+  string randStr = 5;
+}
+
+message ValidationSignatureQuery {
+  SingTypes signType = 1;
+  string signatureStr = 2;
+  bytes signatureByte = 3;
+  Sign signatureSign = 4;
+}
+message ValidationSignatureQueryResponse {
+  int32 code = 1;
+  string msg = 2;
+}
+
+// 滑动图片验证码获取
+message SlideImgQuery {
+  int32 zone = 1;
+  string phone = 2;
+  int64 uid = 3; // 用户id
+  string email = 5; // email
+  SlideImgType type = 4; // 图片验证码的返回类型, 0: 二进制, 1: base64
+}
+
+message SlideImgQueryResponse {
+  int32 code = 1; // 400：电话格式错误
+  string bkgImgStr = 2;
+  string cutoutImgStr = 3;
+  bytes bkgImgByte = 4;
+  bytes cutoutImgByte = 5;
+  uint64 offsetY = 6;
+  string msg = 7;
+}
+
+enum MachineVerifyType {
+  MVT_None = 0x00;
+  MVT_Slide = 0x01; // 滑动图片
+  MVT_Block = 0x02; // 拼图图片
+  MVT_Rotate = 0x03; // 旋转图片
+}
+
+// 获取人机验证图片
+message MachineVerifyImgQuery {
+  int32 zone = 1;
+  string phone = 2;
+  int64 uid = 3; // 用户id
+  string email = 4; // email
+  SlideImgType type = 5; // 图片验证码的返回类型, 0: 二进制, 1: base64
+}
+
+message MachineVerifyImgQueryResponse {
+  int32 code = 1; // 400：电话格式错误
+  string msg = 2;
+  MachineVerifyType verifyType = 6; // 服务器返回的验证类型
+
+  message BlockImg {
+      repeated bytes imgByte = 1; // 二维二进制图片数据
+      repeated string imgStr = 2; // base64图片数组
+  }
+  BlockImg blockImg = 3; // 拼图图片
+
+  message SlideImg {
+      string bkgImgStr = 2; // 背景图
+      string cutoutImgStr = 3; // 拼图滑块
+      bytes bkgImgByte = 4;
+      bytes cutoutImgByte = 5;
+      uint64 offsetY = 6; // 滑块y轴偏移坐标值
+  }
+  SlideImg slideImg = 4; // 滑动图片
+
+  message RotateImg {
+      // string bkgStr = 2; // 背景图
+      string rotateStr = 3; // 旋转图块
+      // bytes bkgByte = 4;
+      bytes RotateByte = 5;
+  }
+  RotateImg rotateImg = 5; // 旋转图片
+
+}
+
+
+// 拼图图片验证
+message BlockVerifyQuery {
+  int32 zone = 1;
+  string phone = 2;
+  int64 uid = 3;
+  string email = 4; // email
+  string blockOrder = 5; // 拼图验证的顺序 eg: 1324
+  SingTypes signType = 6; // 返回签名类型, 响应则返回对应的类型(对应SingTypes)
+  SlideImgType type = 7; // 验证错误时新返回的验证码图片数据类型, 0: 二进制, 1: base64
+}
+message BlockVerifyQueryResponse {
+  int32 code = 1; // 400：电话格式错误，304： 验证错误
+  string msg = 2;
+  string signatureStr = 3; // 字符串签名
+  bytes signatureByte = 4; // byte签名
+  Sign signatureSign = 5; // sing结构体对象签名
+  // 验证错误的时候返回新的验证数据
+  repeated bytes imgByte = 6; // 二维二进制图片数据
+  repeated string imgStr = 7; // base64图片数组
+}
+
+// 旋转拼图验证
+message RotateVerifyQuery {
+  int32 zone = 1;
+  string phone = 2;
+  int64 uid = 3;
+  string email = 4; // email
+  int64 angle = 5; // 用户旋转的角度 eg: 45
+  SingTypes signType = 6; // 返回签名类型, 响应则返回对应的类型(对应SingTypes)
+  SlideImgType type = 7; // 验证错误时新返回的验证码图片数据类型, 0: 二进制, 1: base64
+}
+message RotateVerifyQueryResponse {
+  int32 code = 1; // 400：电话格式错误，304： 验证错误
+  string msg = 2;
+  string signatureStr = 3; // 字符串签名
+  bytes signatureByte = 4; // byte签名
+  Sign signatureSign = 5; // sing结构体对象签名
+  // 验证错误的时候返回新的验证数据
+  string bkgStr = 6; // 背景图
+  string rotateStr = 7; // 旋转图块
+  bytes bkgByte = 8;
+  bytes RotateByte = 9;
+}
+
+// 滑动图片验证
+message ValidateSlideImgQuery {
+  int32 zone = 1;
+  string phone = 2;
+  int64 uid = 3;
+  float offsetX = 4; // x 轴线偏移量px
+  uint64 expendTime = 5; // 用户的滑动时间
+  string email = 6; // email
+  SingTypes signType = 9; // 客户端需要的签名类型, 响应则返回对应的类型(对应SingTypes)
+  SlideImgType type = 10; // 验证错误时新返回的验证码图片数据类型, 0: 二进制, 1: base64
+}
+
+message ValidateSlideImgQueryResponse {
+  int32 code = 1; // 400：电话格式错误，304： 验证错误
+  string msg = 2;
+  string signatureStr = 3; // 字符串签名
+  bytes signatureByte = 4; // byte签名
+  Sign signatureSign = 5; // sing结构体对象签名
+  // 验证错误的时候返回新的验证数据
+  string bkgImgStr = 7;
+  string cutoutImgStr = 8;
+  bytes bkgImgByte = 9;
+  bytes cutoutImgByte = 10;
+  uint64 offsetY = 11;
+}
+
+//用户密保验证
+message UserSecurityQuestionValidateSign{
+  int64 uid = 1;
+  uint64 expireTime = 2;
+}
+
+//--------------------------------------------------------------------------------------

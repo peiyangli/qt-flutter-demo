@@ -93,6 +93,9 @@ class Package {
   HeaderView header;
   Uint8List body;
   Package(this.header, this.body);
+  bool get ok{
+    return header.code == HttpStatus.ok || header.code == 0;
+  }
 }
 
 // typedef void NWQueryCallback(Package? pkg);
@@ -118,8 +121,35 @@ class NWError {
 }
 
 class Conn {
+  static Future<Socket> makeConnection(host, int port,
+      {sourceAddress,
+      int sourcePort = 0,
+      Duration? timeout,
+      bool secure = false,
+      secureHost,
+      SecurityContext? context,
+      bool onBadCertificate(X509Certificate certificate)?,
+      List<String>? supportedProtocols}) {
+    return Socket.connect(host, port,
+            timeout: timeout,
+            sourceAddress: sourceAddress,
+            sourcePort: sourcePort)
+        .then((Socket sock) {
+      if (!secure) {
+        return sock;
+      }
+      secureHost ??= host;
+      return SecureSocket.secure(sock,
+          host: secureHost,
+          context: context,
+          onBadCertificate: onBadCertificate,
+          supportedProtocols: supportedProtocols);
+    });
+  }
+
   int id;
-  Conn(this.id, this.onEvent);
+  Conn(this.id, this.onEvent, this.compConncted);
+  Completer<bool> compConncted;
   Socket? _conn;
   NWError _err = NWError(NWStatus.unconnected);
 
@@ -246,13 +276,21 @@ class Conn {
   Timer? _ticker; //
   int _tick = 0;
   Function? _onError;
-  void connect(ConnConfig cfg, {Function? onError, bool? cancelOnError}) async {
+  void connect(
+    ConnConfig cfg, {
+    Function? onError,
+    bool? cancelOnError,
+    Function? onHeartBeat,
+    Function? onConnected,
+  }) async {
     //only connect once
     if (_err.status != NWStatus.unconnected) {
+      //connect failed?
+      if (!compConncted.isCompleted) {
+        compConncted.completeError("connect error: status");
+      }
       return;
     }
-    var onHeartBeat = cfg.onHeartBeat;
-    var onConnected = cfg.onConnected;
     if (onHeartBeat != null && cfg.heartBeatTick > 0) {
       _ticker = Timer.periodic(const Duration(seconds: 1), (timer) {
         if (_tick++ > cfg.heartBeatTick) {
@@ -271,9 +309,10 @@ class Conn {
     // securityContext.useCertificateChainBytes(cert1.codeUnits);
     // securityContext.setAlpnProtocols([], true);
 
-    SecureSocket.connect(
+    makeConnection(
       cfg.host,
       cfg.port,
+      secure: true,
       context: securityContext,
       onBadCertificate: (cert) {
         var pem = cert.pem;
@@ -287,12 +326,14 @@ class Conn {
         //maybe closed
         _disconnected(NWError(NWStatus.close));
         value.close(); //why?
+        compConncted.completeError("maybe closed");
         return;
       }
       _conn = value;
       if (onConnected != null) {
         onConnected();
       }
+      compConncted.complete(true);
       // List cache = <Uint8>[];
       Uint8List buffer512 = Uint8List(bufferLength);
       Uint8List cache = buffer0;
@@ -369,99 +410,42 @@ class Conn {
         _disconnected(NWError(NWStatus.done));
       }, cancelOnError: cancelOnError);
     }).onError((e, s) {
+      //connect failed?
+      compConncted.completeError(e ?? "connect error: unknown", s);
       _disconnected(NWError(NWStatus.connectError, e: e, s: s), n: true);
     });
   }
 }
 
 class ConnConfig {
-  ConnConfig(this.host, this.port,
-      {this.heartBeatTick = 172,
-      this.connectTimeout = const Duration(seconds: 15),
-      this.onHeartBeat,
-      this.onConnected});
+  ConnConfig(
+    this.host,
+    this.port, {
+    this.heartBeatTick = 172,
+    this.connectTimeout = const Duration(seconds: 15),
+    // this.onHeartBeat,
+    // this.onConnected,
+    // this.onDisconnected,
+  });
+  factory ConnConfig.fromString(String uri) {
+    var schemek = uri.indexOf(":");
+    if (schemek < 1 || schemek > 6) {
+      uri = "tls://" + uri;
+    }
+    var url = Uri.parse(uri);
+    return ConnConfig(url.host, url.port);
+  }
   String host;
   int port;
   int heartBeatTick;
   Duration connectTimeout;
-
-  Function? onConnected;
-  Function? onHeartBeat;
 }
 
-class Network {
-  ConnConfig? config;
-  Network();
-  //Isolate.spawn(otherIsolate, receivePort.sendPort);
-  //the connection
-  int _id = 0;
-  Conn? _conn;
-  bool connect(ConnConfig cfg) {
-    if (_conn != null) {
-      return false;
-    }
-    config = cfg;
-    final id = _id++;
-    _conn = Conn(id, onEvent);
-    //tcp 29902, tls 19708 qt, tls 20001
-    _conn!.connect(
-      cfg,
-      onError: (NWError? e) {
-        // if(_conn == null){return;}
-        if (_conn?.id != id) {
-          return;
-        }
-        _conn = null;
-        var err = e?.err;
-        print("disconnected, try reconnect if $err");
-      },
-    );
-    return true;
-  }
-
-  // void onHeartBeat() {
-  //   var ok = send(Fids.Fids_SysHeartBeatQuery);
-  //   print("onHeartBeat: $ok");
-  // }
-
-  void close() {
-    if (_conn != null) {
-      _conn!.close();
-      // _conn = null;
-      print("closed");
-    }
-  }
-
-  void onEvent(Package pkg) {
-    // var hd = Header(data.sublist(0, Header.headerLength));
-    print("on event: $pkg");
-  }
-
-  Future<Package> query(ProtobufEnum fid, {GeneratedMessage? q}) async {
-    if (_conn == null) {
-      var c = Completer<Package>();
-      c.completeError(NWError(NWStatus.unconnected));
-      return c.future;
-    }
-    var header = Header.build(fid);
-    if (q != null) {
-      Uint8List body = q.writeToBuffer();
-      return _conn!.query(header, body: body);
-    }
-    return _conn!.query(header);
-  }
-
-  bool send(ProtobufEnum fid, {GeneratedMessage? q}) {
-    if (_conn == null) {
-      return false;
-    }
-    var header = Header.build(fid);
-    if (q != null) {
-      Uint8List body = q.writeToBuffer();
-      return _conn!.send(header, body: body);
-    }
-    return _conn!.send(header);
-  }
+abstract class NetworkConfigure {
+  Future<ConnConfig> getConfig();
+  void onConnected();
+  void onHeartBeat();
+  void onDisconnected(NWError e);
 }
 
 //==========================================================

@@ -1,0 +1,89 @@
+/user/group/leave/list	$1	#POST	GroupUserDelInfoListQuery	群拉黑相关
+/user/group/leave/modify	$1	#POST	GroupUserDelModifyQuery	群拉黑相关
+/user/friend/apply	$1	#POST	FriendApplyQuery	好友申请
+/user/friend/applylist	$1	#POST	FriendApplyInfoListNoRpcQuery	好友申请列表
+/user/friend/add	$1	#POST	FriendAddQuery	添加好友
+/user/friend/apply/clean	$1	#POST	FriendApplyListClearQuery	清除好友申请
+/user/friend/applylistcount	$1	#POST	FriendApplyInfoListCountQuery	统计好友申请数量
+/user/friend/list	$1	#POST	FriendInfoListQuery	好友列表
+/user/friend/status	$1	#POST	FriendStatusQuery	好友状态
+/user/friend/info/set	$1	#POST	FriendInfoSetQuery	好友设置
+/user/group/create	$1	#POST	GroupCreateQuery	创建群
+/user/friend/setname	$1	#POST	FriendModifyNameQuery	好友备注修改
+/user/friend/modify/status	$1	#POST	FriendModifyInfoStatusQuery	好友状态修改
+/user/friend/FriendTagCreateQuery	$1	#POST	FriendTagCreateQuery	创建好友分组名称
+/user/friend/FriendTagUpdateQuery	$1	#POST	FriendTagUpdateQuery	更新好友分组名称
+/user/friend/FriendTagRemoveQuery	$1	#POST	FriendTagRemoveQuery	删除好友分组名称
+/user/friend/FriendTagInfoListQuery	$1	#POST	FriendTagInfoListQuery	好友分组列表
+/user/friend/FriendPriInfoSetQuery	$1	#POST	FriendPriInfoSetQuery	好友分组设置
+/user/group/mini/addlist	$1	#POST	GroupMiniAddToListQuery	添加用户群关系
+/user/group/dismissleave	$1	#POST	GroupDismissLeaveQuery	删除用户群关系
+/user/group/list	$1	#POST	GroupListQuery	用户群关系列表
+/user/group/info	$1	#POST	GroupInfoQuery	群信息获取
+/user/admin/group/info	$1	#POST	GroupAdminInfoQuery	获取群问题、答案
+/user/group/infos	$1	#POST	GroupInfosQuery	批量群信息
+/user/group/member/list	$1	#POST	GroupMemberListQuery	群成员列表
+/user/group/member/info	$1	#POST	GroupMemberInfoQuery	指定群成员信息
+/user/group/member/count	$1	#POST	GroupMembersCountQuery	获取群成员数量
+/user/group/member/me	$1	#POST	GroupIsMeInGroupQuery	是否群成员
+/user/group/member/leave	$1	#POST	GroupMemberLeaveQuery	退群、踢人
+/user/group/apply/query	$1	#POST	GroupJoinApplyQuery	申请、邀请加群
+/user/group/apply/list	$1	#POST	GroupJoinApplyListQuery	申请群列表
+/user/group/admin/add	$1	#POST	GroupAddAdminQuery	添加管理员
+/user/group/admin/remove	$1	#POST	GroupRemoveAdminQuery	移除管理员
+/user/group/myrole	$1	#POST	GroupMyRoleQuery	获取群身份
+/user/group/myroles	$1	#POST	GroupMyRolesQuery	批量获取身份
+/user/group/admin/silent	$1	#POST	GroupAdminSilentGroupQuery	设置群禁言
+/user/group/admin/silentuser	$1	#POST	GroupAdminSilentUserQuery	群成员禁言
+/user/group/admin/member/setname	$1	#POST	GroupModifyMemberNameQuery	修改群成员昵称
+/user/group/apply/review	$1	#POST	GroupJoinApplyReviewQuery	审核群申请
+/user/group/join	$1	#POST	GroupJoinQuery	加群
+/user/group/upgrade/capacity	$1	#POST	GroupUpgradeCapacityQuery	群容量扩容
+/user/group/upgrade/mini	$1	#POST	GroupConvertMiniToNormalQuery	升级大群
+/user/group/root/transfer	$1	#POST	GroupRootTransferQuery	群主转移
+/user/group/admin/info/modify	$1	#POST	GroupModifyInfoQuery	修改群信息
+/user/group/admin/seti/onoff	$1	#POST	GroupAdminSetIFlagsOnOffQuery	群设置
+/user/group/search/count	$1	#POST	GroupSearchCountQuery	群标签个数统计
+/user/group/mycountofcap	$1	#POST	GroupMyCountOfCapQuery	个人创建群数量统计
+/user/group/leave/remove	$1	#POST	GroupUserDelRemoveQuery	删除user del
+/user/group/msg/top/list	$1	#POST	NewsTopListQuery	顶消息列表
+/user/group/msg/top/add	$1	#POST	NewsTopAddQuery	添加置顶消息
+/user/group/msg/top/update	$1	#POST	NewsTopUpdateQuery	更新置顶消息
+/user/group/msg/top/del	$1	#POST	NewsTopDelQuery	删除置顶消息
+/user/group/msg/forward	$1	#POST	GroupMsgForwardSendQuery	群转发
+/user/chat/group	$1	#POST	ChatGroupQuery	聊天分组列表
+/user/chat/group/modify	$1	#POST	ModifyChatGroupQuery	修改聊天分组
+/user/chat/group/order	$1	#POST	OrderChatGroupQuery	修改聊天分组顺序
+/user/chat/group/move	$1	#POST	MoveChatGroupQuery	移动聊天到另一个分组
+/user/chat/group/new	$1	#POST	NewChatGroupQuery	新建聊天分组
+/user/chat/group/remove	$1	#POST	RemoveChatGroupQuery	删除聊天分组
+/user/collect/message	$1	#POST	CollectMessageQuery	收藏消息
+/user/cancel/collect/message	$1	#POST	CancelCollectMessageQuery	取消收藏
+/user/collect/list	$1	#POST	CollectMsgListQuery	收藏列表
+/user/collect/config	$1	#POST	CollectConfigQuery	收藏配置信息
+/user/collect/pwd	$1	#POST	CollectPwdSetQuery	收藏密码设置
+/user/collect/verify	$1	#POST	CollectPwdVerifyQuery	收藏密码验证
+/user/school/visible/set	$1	#POST	SchoolVisibleSetQuery	学籍信息显示设置
+/user/login/device/add	$1	#POST	UserDeviceInfoAddQuery	添加登录设备
+/user/login/device/remove	$1	#POST	UserDeviceInfoRemoveQuery	移除登录设备
+/user/login/device/list	$1	#POST	UserDeviceInfoListQuery	登录设备列表
+/user/sticker/favorite/add	$1	#POST	StickerAddFavoriteQuery	收藏表情
+/user/sticker/favorite/list	$1	#POST	StickerMyFavoriteListQuery	收藏表情列表
+/user/friend/info/sign	$1	#POST	FriendSignInfoQuery	好友信息签名
+/v2/guest/sys/SysImHostsQuery	$0	#GET	SysImHostsQuery	
+/v2/guest/sys/SysEchoQuery	$0	#POST	SysEchoQuery	
+/v2/guest/user/UserHostQuery	$0	#POST	UserHostQuery	
+/v2/guest/user/DefaultUserBasicInfoSignForTokenQuery	$0	#POST	DefaultUserBasicInfoSignForTokenQuery	
+/v2/guest/account/user/UserPasswordsSetQuery	$0	#POST	UserPasswordsSetQuery?NoLogin=true	用户密码相关
+/v2/user/sys/SysImHostsQuery	$1	#GET	SysImHostsQuery	
+/v2/user/sys/SysEchoQuery	$1	#POST	SysEchoQuery	
+/v2/user/imex/user/UserOnlineInfosQuery	$1	#POST	UserOnlineInfosQuery	
+/v2/user/account/user/UserInfoQuery	$1	#POST	UserInfoQuery	用户信息
+/v2/user/account/user/UserPrivQuery	$1	#POST	UserPrivQuery	用户密码相关
+/v2/user/account/user/UserPrivSetQuery	$1	#POST	UserPrivSetQuery	用户密码相关
+/v2/user/account/user/UserPasswordsSetQuery	$1	#POST	UserPasswordsSetQuery	用户密码相关
+/v2/user/account/user/QrCodeUrlQuery	$1	#POST	QrCodeUrlQuery	二维码相关
+/v2/user/account/user/QrCodeUrlCheckQuery	$1	#POST	QrCodeUrlCheckQuery	二维码相关
+/v2/user/account/user/UserSrp1QueryNode	$1	#POST	UserSrp1QueryNode	
+/v2/user/account/user/UserSrp2QueryNode	$1	#POST	UserSrp2QueryNode	
+/auth/token	$0	#POST	DefaultUserBasicInfoSignForTokenQuery	

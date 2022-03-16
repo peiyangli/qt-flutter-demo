@@ -1,0 +1,1 @@
+/ng/guest/gw/GroupNBGatewayQuery	$0	#POST	GroupNBGatewayQuery	获取附件的群的网关

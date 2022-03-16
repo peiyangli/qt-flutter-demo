@@ -1,0 +1,352 @@
+syntax = "proto3";
+package pb;
+
+option go_package = "./pb;pb";
+option java_package = "com.woyue.im";
+option java_outer_classname = "PbTypes";
+// option objc_class_prefix = "V2_";
+
+
+enum ProtoVersion{
+  PV_None = 0x00;
+  PV_Cur = 0x01;//current version
+}
+
+enum IdTypes{
+  IT_None = 0;
+  IT_Uid = 1;
+  IT_CustomerService = 2;
+  IT_Group = 3;
+  IT_News = 4;
+  IT_Live = 5;
+}
+
+
+enum EncodeTypes{
+  ET_None = 0;
+  ET_RawBinary = 1;
+  ET_StdBase64 = 2;
+  ET_UrlBase64 = 3;
+  ET_Hex = 4;
+}
+
+enum SignEncodeTypes{
+  SET_None = 0;
+  SET_Aes128SaltRandom = 1;
+}
+
+// MT = <<MsgTypeEncodes:16, MsgTypes:16>>
+enum MsgTypes{
+  MT_Binary = 0;
+
+  MT_Text = 1;
+  MT_Pic = 2;
+  MT_Video = 3;
+  MT_Audio = 4;
+  MT_Map = 5;
+  MT_Card = 6;
+  MT_File = 7;
+  MT_Sticker = 8; //see pb_meta.MsgMetaContentStickers
+  MT_Voip = 9; //voice, video call
+  MT_Repost = 0x0a;
+  MT_Share = 0x10; //shared something , mt=; md={"share":[日程分享]}
+  MT_ShareEx = 0x11;
+  MT_ShareInApp = 0x12;
+
+  MT_Html = 0x21;
+  MT_Json = 0x22;
+  MT_Xml = 0x23;
+  MT_PB = 0x24; //protobuffer
+
+  MT_Notice = 0x25;
+
+  MT_Event = 0x30; //client events
+  MT_Announcement = 0x32;//
+
+  MT_TextEx  = 0x33;
+  MT_Forward  = 0x34;
+}
+
+// MT = <<MsgTypeEncodes:16, MsgTypes:16>>
+//enum MsgTypeEncodes{
+//    MTE_None = 0x0;
+//    MTE_MCDoubleRatchet = 0x1;
+//}
+
+// MT = <<MsgMessageEncryptions:16, MsgTypes:16>>
+enum MsgMessageEncryptions{
+  MME_None = 0;
+  MME_DR = 1; //double ratchet(P2P)
+  MME_EC = 2; //ellipse curve(MutiDevice)
+  MME_IGA = 4; //
+  MME_IGB = 8; //
+}
+
+enum DeviceFirms{
+  DF_None = 0;
+  DF_Apple = 1;
+  DF_Huawei = 2;
+  DF_Xiaomi = 3;
+  DF_Meizu = 4;
+  DF_Vivo = 5;
+  DF_Oppo = 6;
+}
+
+
+
+// uid + password
+// uid + auto code
+// xid + password
+// zone-phone + code
+// email + code
+enum UserLoginTypes{
+  ULT_None = 0;
+
+  ULT_UidPassword = 1; //srp sign
+  ULT_UidAutoCode = 2; //srp sign
+  ULT_XidPassword = 3; //srp sign. xid must be unique, and for show only, like unique name
+
+
+  ULT_ZonePhoneCode = 4; //if not existed, create one
+  ULT_EmailCode = 5; //if not existed, create one
+  ULT_NamePassword = 6; //only name unique
+  ULT_ExternalHosting   = 7; //user not local,
+  ULT_ExternalHostingAuto   = 8;
+  ULT_WeChat = 11; //if not existed, create one
+
+  ULT_UserLoginSrp2 = 12; //the second step for all srp login
+
+  ULT_UserLoginUidGlobalToken = 13;
+  ULT_UidAutoCode2 = 14; //
+  ULT_UserLoginUidQrCode = 15;//
+
+  ULT_UserLoginSign = 16;//
+  ULT_UserLoginSignBytes = 17;//
+
+  ULT_UserLoginNewDevice = 22;
+  ULT_UserLoginAny = 30;//
+}
+
+
+enum ResponseErrorFlags{
+  REF_None = 0;
+  REF_ErrSearch = 1;
+  REF_ErrEvent = 2;
+}
+
+
+enum MsgToFlags{
+  MTF_None = 0x00;
+  MTF_NoOffline = 0x01; //online only
+  MTF_NoApns = 0x02; //no offline third-firm-push, see ios-apns
+  MTF_NoMultiTerminal = 0x04; //no MultiTerminal
+  MTF_MiniGroup = 0x08; //when idt is a mini-group, set this flag to 1 to let me known this is a big group
+  MTF_DBPushOnly = 0x10; //write message to mails not group. such as message to admins of group
+  MTF_NoEvent = 0x20; //no event, just do other
+  MTF_BoolAny = 0x40; //use any not all
+  MTF_OfflineOnly = 0x80;
+  MTF_Original = 0x100; //user created message
+  MTF_LocalMid = 0x200; //use local mid, only some just so
+  MTF_LoadMembers = 0x400; //load members
+  MTF_TryCS = 0x800; //try cs, no robot
+  MTF_VoIP = 0x10000; //this is voip
+  MTF_DistinctMid = 0x20000; //s-only group message
+  MTF_ForceCheckFriend = 0x40000; //s-only 
+}
+
+enum MsgToFlagsHigh{
+  MTFH_None = 0x00;
+  MTFH_Mute = 0x01; //no message send, do other thing
+}
+
+enum FriendInfoStatus{
+  FIS_None = 0;
+  FIS_Friend = 1;
+  FIS_Black = 2;
+  FIS_Removed = 0x08;
+}
+
+enum GroupInfoStatus{
+  GIS_None = 0;
+  GIS_Removed = 0x08;
+}
+
+enum AccountStatus{
+  AS_None = 0;
+  AS_Removed = 0x08;
+}
+
+//general error response
+message ErrorResponse{
+  string err = 224; // 0xe0=224, this is the err message
+}
+
+message Location{
+  double latitude = 1; // 纬度
+  double longitude = 2; // 经度
+
+  string name = 3;
+  string addr = 4;
+}
+
+message LocationEx{
+  double latitude = 1; // 纬度
+  double longitude = 2; // 经度
+  double  altitude = 5;// 海拔
+}
+
+
+enum Genders{
+  G_None = 0;
+  G_Male = 1;
+  G_Female = 2;
+}
+
+
+message SkipCountDesc{
+  int32 skip = 1; //offset
+  int32 count = 2; //limit
+  bool desc = 3;//if 1 desc
+}
+
+message StrKeyVal{
+  string key = 1;
+  string val = 2;
+}
+
+message SignedData{
+  string key = 3; //to find the encrypt keys
+  bytes sign = 4;
+  bytes data = 5;
+}
+
+message TextCount{
+  int64 cnt = 2;
+  string txt = 3;
+}
+
+message IdCount{
+  int64 cnt = 2;
+  int64 id = 3 [jstype=JS_STRING];
+}
+
+message IdName{
+  int64 id = 1 [jstype=JS_STRING];
+  string name = 3;
+}
+message IdNameAvatar{
+  int64 id = 1 [jstype=JS_STRING];
+  string name = 3;
+  string avatart = 4;
+}
+message ContactInfo{
+  int64 id = 1 [jstype=JS_STRING]; //gid or uid or?
+  string name  = 4;
+  string avatar = 5;
+}
+message IdTagName{
+  int64 id = 1 [jstype=JS_STRING];
+  int64 tag = 2 [jstype=JS_STRING];
+  string name = 3;
+}
+
+message IdVal{
+  int64 id = 1 [jstype=JS_STRING];
+  int64 val = 2 [jstype=JS_STRING];
+}
+
+enum PhoneCodeAuthTypes{
+  PCAT_MOB = 0;
+  PCAT_SMS = 1;
+}
+message ZonePhoneCode{
+  int32 zone = 1;
+  string phone = 2;
+  string code = 3;
+  PhoneCodeAuthTypes t = 4;//
+}
+
+message Int64Range{
+  int64 min = 2;
+  int64 max = 3;
+}
+
+message MidRange{
+  bytes min = 2;
+  bytes max = 3;
+}
+
+//0x0f
+enum GroupRoles{
+  //    GAGF_None    = 0; //
+  GR_Guest   = 0; //0x000f; //0
+  GR_Member  = 4;//0x00f0; //4
+  GR_Admin   = 8; //0x0f00; //8
+  GR_Root    = 12; //0xf000; //12
+}
+
+
+message GroupRole{
+  int64 id = 1 [jstype=JS_STRING];
+  GroupRoles role = 2;
+  string name = 3;
+}
+
+
+message Labels{
+  repeated string labels = 3;
+}
+
+
+message BasicMessageContent{
+  bytes mid = 8; //the// time stamp of this message
+  int32 mt = 11; //message type
+  bytes mm = 13; //message meta
+  bytes mc = 14; //message content data
+  //    bytes mid = 15; //--server generated message id, 16 bytes
+}
+
+message NxtmInfo{
+  int64 nxtm = 1;
+  int64 vip = 2;
+}
+
+
+// 图片认证签名的类型
+enum SingTypes {
+  ST_String = 0x00; // string
+  ST_Byte = 0x01; // byte
+  ST_Sign = 0x02; // sign 结构体对象
+  ST_Base64 = 0x03;
+}
+// 滑动图片数据类型
+enum SlideImgType {
+  SI_Byte = 0x00; // byte
+  SI_String = 0x01; // string
+}
+
+
+enum GroupGenres{
+  GG_None = 0;
+  GG_Small = 1;
+  GG_Normal = 2;
+}
+
+message StrKeyIntVal{
+  string k = 1;
+  int64 v = 2;
+}
+message StrKeyStrVal{
+  string k = 1;
+  string v = 2;
+}
+
+message ConnectionInfo{
+  string addr = 3;//ip:port
+}
+
+message UserNode{
+  int64 uid= 2;
+  string gw = 4;
+  string zone  = 5;// 
+}

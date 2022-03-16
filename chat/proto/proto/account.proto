@@ -1,0 +1,167 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "./pb;pb";
+option java_package = "com.woyue.im";
+option java_outer_classname = "PbAccount";
+// option objc_class_prefix = "V2_";
+import "user.proto";
+import "types.proto";
+
+message DeviceInfo{
+    int32 os = 1; // 查看pb_ids.OSs
+    int32 firm = 2; // 厂商
+
+    string devInf = 3; // 设备信息
+    string appid = 4;  // package name
+    string version = 5;
+    string imei = 6;  // 设备id
+    string channel = 7;
+    string lang = 10; // 语言
+
+//    string push_token = 8; //imei token, push message when offline
+//    string voip_token = 9; //for ios voip call
+}
+
+// message InviterInfo{
+//     string code = 4; // 邀请码 invitation code?
+// }
+
+
+message StudentInfo{
+    string name = 2;  //名字
+    string sid = 3;  //学号
+    repeated string xszImgs = 7; //学生证图片
+    int64 schoolTm = 4; //入学时间
+    //-------------------
+    // int64 gid = 7;// 内部班级群id
+    // int32 academyIid = 8;//学院内部ID
+    // string academy = 9;
+}
+
+message AccountSignUpQuery{
+    DeviceInfo di   = 4; // 设备信息 devInf info
+    UserInviterInfo inviter     = 5; // 邀请人信息inviter info
+    bytes signCaptcha = 6; // 图验证
+    bytes signPhone = 9; // 电话签名
+    UserInfo user = 11;// 昵称与头像
+    SchoolInfo school = 12;//学校专业班级信息
+    StudentInfo student = 13;//个人学籍信息
+}
+
+message AccountSignUpQueryEvent{
+    DeviceInfo di   = 4; // devInf info
+    ConnectionInfo conn = 5; // inviter info
+    UserInfo user = 6; //
+    StudentInfo student = 7;//
+}
+message AccountSignUpQueryResponse{
+    int64 n = 2; //n==1 表示新用户注册成功
+    UserNode gw = 6;// 所属节点
+    bytes sign = 7;// SignPhoneAuth
+    string sd = 9;//server-side data, futher auth use
+}
+
+
+//----------------------------------------------------
+//添加学籍信息， 每个文凭只允许一个申请？
+message AccountStudentInfoAddQuery{
+    SchoolInfo school = 12;//学校专业班级信息
+    StudentInfo student = 13;//个人学籍信息
+}
+message AccountStudentInfoAddQueryResponse{
+    int64 n = 2;
+}
+
+
+message SchoolStudentInfo{
+    SchoolInfo school = 12;//学校专业班级信息
+    StudentInfo student = 13;//个人学籍信息
+}
+
+//获取自己的学籍信息，申请
+enum StudentApplyInfoStatus{
+    SAIS_None = 0;
+    SAIS_OK = 1;  //通过
+    SAIS_Rejected = 4; //已经被拒绝
+    SAIS_Removed = 8; //删除 后台管理用
+}
+message StudentApplyInfo{
+    int64 uid = 2;
+    int64 ctm = 3;
+    int64 mtm = 4;
+    int32 degreeX = 5; // & 0xffff
+    StudentApplyInfoStatus status = 6;//
+    int64 gid = 7; //class id
+    bytes student = 8;//SchoolStudentInfo
+    string comment = 9;
+}
+message AccountStudentInfoListQuery{
+
+}
+message AccountStudentInfoListQueryResponse{
+    repeated StudentApplyInfo data = 4;//
+}
+//----------------------------------------------------
+//----------------------------------------------------
+//身份证
+message SfzImages{
+    string front = 2; //url
+    string back = 3; //url
+    string hand = 4;// 手持
+}
+message SfzVideo{
+    string video = 2; //url
+    bytes data = 3;//服务器数据
+}
+message SfzInfo{
+    string name = 3; //名字
+    string sfz = 4; //id
+    SfzImages imgs = 5;//图片
+    SfzVideo video = 7;//视频
+}
+message AccountAddSfzQuery{
+    SfzInfo sfz = 4;//
+}
+message AccountAddSfzQueryResponse{
+    int64 n = 2;
+    UserImmutableStatus status = 3;
+}
+
+enum UserImmutableStatus{
+    UIS_None = 0;
+    UIS_OK = 1; //通过
+    UIS_Rejected = 4; //拒绝
+    UIS_Removed = 8; //删除
+}
+
+message UserImmutable{
+    int64 uid = 1;
+    // int64 ctm = 2;
+    int64 mtm = 3;
+    int32 status = 4;// UserImmutableStatus
+    string sfz = 8;
+    bytes sfzDetail = 9; //SfzInfo
+    string comment = 10; //未通过原因
+}
+message AccountGetImmutableQuery{
+}
+message AccountGetImmutableQueryResponse{
+    UserImmutable user = 4;
+    bool commited = 5; //是否提交过身份证信息
+}
+//----------------------------------------------------
+//手机通信录
+message AddressBookItem{
+    int64 uid = 1;
+    string name = 2;
+    string phone = 3;//default +86
+}
+message AccountAddressBookMatchQuery{
+    repeated AddressBookItem addressBook = 4;//
+}
+message AccountAddressBookMatchQueryResponse{
+    repeated AddressBookItem addressBook = 4;//response with uid
+}
+//----------------------------------------------------

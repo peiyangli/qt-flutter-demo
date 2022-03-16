@@ -1,0 +1,425 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "./pb;pb";
+option java_package = "com.woyue.im";
+option java_outer_classname = "PbFriend";
+// option objc_class_prefix = "V2_";
+
+import "types.proto";
+//import "sign.proto";
+//import "google/protobuf/any.proto";
+import "auth.proto";
+
+//qrcode scan:0x10, shared card: 0x20, xid search:0x101, name search:0x101, phone search:0x103, email search:0x104, group uid: 0x200, friend share card: 0x400
+enum FriendApplyTypes{
+  FAT_None = 0x00;
+
+  FAT_QrCode = 0x10; //扫描二维码
+  FAT_SharedCard = 0x20; //个人名片
+
+  FAT_SearchXid = 0x101; //ID查找
+  FAT_SearchName = 0x102;//昵称查找
+  FAT_SearchPhone = 0x103;//手机号查找
+  FAT_SearchEmail = 0x104;
+  FAT_SearchLabel = 0x105;//标签查找
+
+  FAT_GroupUid = 0x200; //群聊
+
+  FAT_FriendApplyScoreList = 0x210;
+  FAT_FriendDriftBottle  = 0x211;
+
+  FAT_FriendApplyMoment  = 0x221;
+  FAT_FriendApplySign     = 0x222;
+  FAT_QingTengWindow     = 0x223;//青藤之窗
+  FAT_AttentionOrFans     = 0x224;//关注/粉丝列表
+  FAT_Invitation    = 0x225;//邀请注册
+  FAT_Nearby    = 0x226;//附近聚点
+
+  FAT_FriendSharedCard = 0x400;
+  FAT_FriendAddressBook = 0x401; //手机通讯录
+
+}
+
+message FriendApplyQrCode{
+
+}
+message FriendApplySharedCard{
+
+}
+message FriendApplySearchXid{
+
+}
+message FriendApplySearchName{
+  string name = 3;//the search name, maybe ab and you are "ab cde"
+}
+message FriendApplySearchPhone{
+
+}
+message FriendApplySearchEmail{
+
+}
+message FriendApplyGroupUid{
+  int64 gid = 1 [jstype=JS_STRING];
+  string name = 3;//group name
+}
+message FriendApplyFriendSharedCard{
+
+}
+message FriendApplyScoreList{
+}
+message FriendDriftBottle{
+  int64 id = 1 [jstype=JS_STRING];//DriftBottle id
+}
+
+message FriendApplyMoment{
+  int64 id = 1 [jstype=JS_STRING];//
+  int64 cid = 2 [jstype=JS_STRING];//
+}
+
+enum FriendApplySignOrigins{
+  FASO_None = 0;
+  FASO_Moment = 1;
+  FASO_Nearby = 2;
+}
+message FriendApplySign{
+  FriendApplySignOrigins org = 2;
+}
+//client side information
+message FriendApplyStatement{
+  FriendApplyTypes type = 3; //apply type
+
+  string statement = 4;//statement
+
+
+  FriendApplyQrCode               qc = 8;
+  FriendApplySharedCard           sc = 9;
+  FriendApplySearchXid            sx = 10;
+  FriendApplySearchName           sn = 11;
+  FriendApplySearchPhone          sp = 12;
+  FriendApplySearchEmail          se = 13;
+  FriendApplyGroupUid             gu = 14;
+  FriendApplyFriendSharedCard     fsc = 15;
+  FriendApplyScoreList            sl = 16;
+  FriendDriftBottle               db = 17;
+  FriendApplyMoment               mm = 18;//
+  FriendApplySign                 as = 19;//
+}
+
+enum FriendApplyStatementDataTypes{
+  FASDT_Apply = 0;
+  FASDT_Accept = 1;
+}
+message FriendApplyStatementData{
+  FriendApplyStatementDataTypes t = 1;
+  FriendApplyStatement sm = 3; //
+}
+
+//server side information
+message FriendApplyAttachment{
+  //too frequently, too often
+}
+
+message FriendApplyQuery{
+
+  int64 uid = 1 [jstype=JS_STRING];//apply who
+
+  FriendApplyStatement sm = 6; //see FriendApplyStatement
+
+  NxtmInfo nxtm = 9;//ignore this query
+
+  IdName executor = 15;
+
+  CaptchaDataAnswerSign captcha = 5;//
+}
+
+message FriendApplyQueryResponse{
+  int32 status = 2;//current status
+  int32 n = 3;//if 1 ok, if 0, see status
+  bool old = 4;//is old friend
+  int64 max = 5;//max friend count reach
+  int32 captchaN = 16; //
+}
+
+message FriendApplyQueryEvent{
+  int64 uid = 1 [jstype=JS_STRING];//apply who
+  FriendApplyStatement sm = 6; //see FriendApplyStatement
+  IdName executor = 15;
+}
+
+message FriendApplyBQuery{
+  int64  uid = 1 [jstype=JS_STRING];
+  //    FriendApplyQuery query = 2;
+  //    FriendInfo fi = 3;
+  int64 flags = 4; //flags converted from apply type
+  bytes sm = 6; //already checked sm in binary
+  //    repeated FriendApplyInfo fas = 7;// friend apply infos A
+}
+
+enum FriendApplyStatus{
+  FAS_None = 0;
+  FAS_Read = 1;
+  FAS_Added = 2;
+  FAS_Blocked = 3;
+  FAS_Ignored = 4;
+  FAS_End = 5;
+}
+
+message FriendApplyInfo{
+  int64 fid = 2 [jstype=JS_STRING];
+  int64 ctm = 3;
+  int64 mtm = 4;
+  int32 status = 5; //see FriendApplyStatus. status nothing 0, read 1, added 2, block 3, ignore 4
+  //    int32 amt = 6;//see FriendApplyAmts
+  bytes sm = 8; //statement, use FriendApplyStatement to decode
+  bytes am = 9; //attachment, see FriendApplyAttachment
+}
+
+//order by mtm, desc
+message FriendApplyInfoListQuery{
+  int64 mtm = 3;
+  SkipCountDesc limit = 4;
+}
+
+message FriendApplyInfoListQueryResponse{
+  repeated FriendApplyInfo data = 4;
+}
+
+message FriendApplyInfoListCountQuery{
+  int64 mtm = 3;
+}
+message FriendApplyInfoListCountQueryResponse{
+  int64 n = 2;
+}
+
+message FriendApplyListClearQuery{
+  bool all = 3; //set true to clear all, and ignore fids, otherwise use fids to clear, maybe <0
+  Int64Range mtm = 4; //mtm-range
+  repeated int64 fids = 7 [jstype=JS_STRING];
+}
+message FriendApplyListClearQueryResponse{
+  int64 n = 2;
+}
+
+//by adding friend with sign
+message FriendAddInfoSign{
+  int64 tm = 1; // create time
+  int64 expire = 2; // expire
+  int64 uid = 4 [jstype=JS_STRING]; // uid
+  int64 fid = 5 [jstype=JS_STRING]; // friend uid
+}
+//add friend by apply info
+message FriendAddQuery{
+  int64 fid = 2 [jstype=JS_STRING];
+  FriendApplyStatus status = 3;
+
+  bytes sign = 7; //if len(sign) > 0, sign data of type FriendAddInfoSign
+  bytes sm = 8; //statement, use FriendApplyStatement to decode
+  bytes am = 9; //attachment, see FriendApplyAttachment
+  IdName executor = 15;
+}
+
+message FriendAddBQuery{
+  int64 fid = 2 [jstype=JS_STRING];
+  FriendApplyStatus status = 3;
+
+  bool sign = 7; //if len(sign) > 0, sign data of type FriendAddInfoSign
+  bytes sm = 8; //statement, use FriendApplyStatement to decode
+  bytes am = 9; //attachment, see FriendApplyAttachment
+}
+
+message FriendAddQueryResponse{
+  int64 n = 2;
+  int64 max = 3; //left count to add friend
+}
+
+message FriendAddQueryEvent{
+  int64 fid = 2 [jstype=JS_STRING];
+  FriendApplyStatus status = 3;
+
+  bytes sign = 7; //if len(sign) > 0, sign data of type FriendAddInfoSign
+  bytes sm = 8; //statement, use FriendApplyStatement to decode
+  bytes am = 9; //attachment, see FriendApplyAttachment
+
+  IdName executor = 15;
+}
+
+
+enum FriendABIFlags{
+  FAF_None = 0;
+  FAF_Hidden = 1;
+}
+
+message FriendABS{
+  string password = 6;
+}
+
+enum FriendInfoFlags{
+  FIF_None = 0;
+  FIF_MsgBiRecall = 0x01;
+}
+message FriendInfo{
+  //    int64 uid = 1;
+  int64 fid = 2 [jstype=JS_STRING];
+  int64 ctm = 3;
+  int64 mtm = 4;
+  int32 status = 5;
+  int64 abi = 7; //FriendABIFlags for fid
+  int64 bai = 8; //FriendABIFlags by fid
+  bytes abs = 9; //FriendABS for fid
+  bytes bas = 10; //FriendABS by fid
+  string name = 11;
+  bytes sm = 12; //see FriendApplyStatementData
+  bytes tags = 13;
+  // int64 fi = 14;
+  int64 flags = 15; //see FriendInfoFlags
+}
+message FriendInfoListQuery{
+  int32 status = 2;
+  int64 mtm = 3;
+  SkipCountDesc limit = 4;
+}
+
+message FriendInfoListQueryResponse{
+  repeated FriendInfo data = 4;
+}
+
+message FriendInfoSetQuery{
+  int64 fid = 2 [jstype=JS_STRING]; //the one you wanna make sets for
+
+  bool event = 5; //event to friend
+  uint64 flags = 6; //default no-apns, control code: 0x01 no offline, see MsgToFlags
+
+  repeated int64 abi = 7; //FriendABIFlags for fid
+  repeated FriendABS abs = 9; //FriendABS for fid
+}
+
+message FriendInfoSetQueryResponse{
+  int64 n = 2;
+}
+
+message FriendInfoSetQueryEvent{
+  int64 uid = 1 [jstype=JS_STRING]; //the one you wanna make sets for
+
+  repeated int64 abi = 7; //FriendABIFlags for fid
+  repeated FriendABS abs = 9; //FriendABS for fid
+}
+
+message FriendTagsMetaData{
+  repeated int64 ctm = 3;// as id
+}
+message FriendTagsData{
+  int64 fid = 2 [jstype=JS_STRING];
+  bytes tags = 3;//see FriendTagsMetaData
+}
+message FriendPriInfoSetQuery{
+  repeated FriendTagsData tags = 3; //user friend tags
+}
+message FriendPriInfoSetQueryResponse{
+  int64 n = 2;
+}
+
+//modify friend nick-name
+message FriendModifyNameQuery{
+  int64 fid = 2 [jstype=JS_STRING]; //friend uid
+  string name = 3; //a new nick name for your friend
+}
+message FriendModifyNameQueryResponse{
+  int64 n = 2; //ok > 0
+}
+
+// if is your friend, do this
+message FriendModifyInfoStatusQuery{
+  int64 fid = 2 [jstype=JS_STRING];
+  FriendInfoStatus status = 3;//new status
+  repeated int64 fids = 5 [jstype=JS_STRING];//
+}
+message FriendModifyInfoStatusQueryResponse{
+  int64 n = 2;
+}
+//no event
+
+enum FriendFlagsBitOpts{
+    FFBO_None = 0;
+    FFBO_Replace = 1;
+    FFBO_BitSet  = 2; //set some flags
+    FFBO_BitClear  = 3; //clear some flags
+}
+enum FriendFlagsBitOptControls{
+  FFBOC_None = 0;
+  FFBOC_NoEvent = 0x1;
+}
+message FriendFlagsBitOptQuery{
+  int64 fid = 2; //friend uid
+  FriendFlagsBitOpts opt = 3;
+  int32 ctrl = 4;// see FriendFlagsBitOptControls
+  int64 flags = 15; //see FriendInfoFlags
+}
+message FriendFlagsBitOptQueryResponse{
+  int64 flags = 15; //see FriendInfoFlags
+}
+message UDMsgBiRecallRefuse{
+    int64 uid = 1;
+}
+message FriendFlagsBitOptQueryEvent{
+  int64 uid = 1;
+  FriendFlagsBitOptQuery q = 2;
+  FriendFlagsBitOptQueryResponse r = 3;
+}
+// FriendTag ========================================================================
+message FriendTagInfo{
+  int64 uid = 1 [jstype=JS_STRING];
+  //    int64 id = 2;// the id of tag
+  int64 ctm = 3; // as id
+  int64 mtm = 4;//
+  string name = 5;//
+}
+message FriendTagCreateQuery{
+  repeated string names = 5;//
+}
+message FriendTagCreateQueryResponse{
+  int64 n = 2;//
+  repeated FriendTagInfo data = 3;//
+}
+
+message FriendTagUpdateQuery{
+  int64 ctm = 3; // as id
+  repeated string name = 5;//
+}
+message FriendTagUpdateQueryResponse{
+  int64 n = 2;//
+}
+message FriendTagRemoveQuery{
+  int64 ctm = 3; // as id
+}
+message FriendTagRemoveQueryResponse{
+  int64 n = 2;//
+}
+
+enum FriendTagInfoListMethods{
+  FTILM_None = 0;
+  FTILM_Mtm = 1;
+  FTILM_Ctm = 2;
+}
+message FriendTagInfoListQuery{
+  FriendTagInfoListMethods m = 2;//
+  int64 tm = 3;// ctm or mtm?
+  SkipCountDesc limit = 4;
+}
+message FriendTagInfoListQueryResponse{
+  repeated FriendTagInfo data = 3;//
+}
+// FriendTag ========================================================================
+enum FriendStatusQueryFlags{
+  FSQF_None = 0;
+  FSQF_FriendsView = 0x01;
+}
+message FriendStatusQuery{
+  int32 flags = 2; //set to FSQF_FriendsView, and must be in then same shards
+  repeated int64 uids = 3 [jstype=JS_STRING];//your friends
+}
+message FriendStatusQueryResponse{
+  int32 shards = 2;//
+  repeated FriendInfo data = 3;
+}
