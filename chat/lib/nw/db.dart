@@ -216,16 +216,12 @@ class AccountDatabase {
       version: ver,
       onCreate: (db, version) async {
         // Run the CREATE TABLE statement on the database.
-        await db.execute(
-          '''
-CREATE TABLE kvib(k INTEGER NOT NULL PRIMARY KEY, v BLOB);
-CREATE TABLE kvis(k INTEGER NOT NULL PRIMARY KEY, v TEXT);
-CREATE TABLE kvii(k INTEGER NOT NULL PRIMARY KEY, v INTEGER);
-CREATE TABLE kvsb(k TEXT NOT NULL PRIMARY KEY, v BLOB);
-CREATE TABLE kvss(k TEXT NOT NULL PRIMARY KEY, v TEXT);
-CREATE TABLE kvsi(k TEXT NOT NULL PRIMARY KEY, v INTEGER);
-''',
-        );
+        await db.execute("CREATE TABLE kvib(k INTEGER NOT NULL PRIMARY KEY, v BLOB);");
+        await db.execute("CREATE TABLE kvis(k INTEGER NOT NULL PRIMARY KEY, v TEXT);");
+        await db.execute("CREATE TABLE kvii(k INTEGER NOT NULL PRIMARY KEY, v INTEGER);");
+        await db.execute("CREATE TABLE kvsb(k TEXT NOT NULL PRIMARY KEY, v BLOB);");
+        await db.execute("CREATE TABLE kvss(k TEXT NOT NULL PRIMARY KEY, v TEXT);");
+        await db.execute("CREATE TABLE kvsi(k TEXT NOT NULL PRIMARY KEY, v INTEGER);");
         if (onCreate == null) {
           return;
         }
@@ -394,7 +390,10 @@ class GlobalDatabase extends AccountDatabase {
             $fixnum.Int64(0),
             AccountDatabase.initDatabase($fixnum.Int64(0),
                 ver: 2,
-                onCreate: (db, ver) {}, onUpgrade: (db, ver0, ver1) async {
+                onCreate: (db, ver) async {
+                  await db.execute(
+                    "CREATE TABLE user_info(k INTEGER NOT NULL PRIMARY KEY, t INTEGER, v BLOB);");
+                }, onUpgrade: (db, ver0, ver1) async {
               if (ver0 < 2) {
                 // -> 2
                 //cache user info {"k":uid, "t": now, "v": protobuf}, expire
